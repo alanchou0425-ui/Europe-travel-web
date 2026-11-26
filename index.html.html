@@ -1,0 +1,2362 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2027 巴黎—布拉格（含CK小鎮）—布達佩斯｜全功能可編輯行程與票券管家</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Inter', 'Noto Sans TC', sans-serif; background-color: #f8fafc; color: #0f172a; }
+  .tabular-nums { font-variant-numeric: tabular-nums; }
+  .modal-backdrop { background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(2px); }
+  .rotate-180 { transform: rotate(180deg); }
+  @media print {
+    header, .no-print { display: none !important; }
+    body { background: #fff; padding: 0; }
+    .print-break-avoid { break-inside: avoid; }
+  }
+</style>
+</head>
+<body class="min-h-screen pb-16">
+
+  <!-- Top Sticky Header & Collapsible Overview -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2.5">
+      <!-- Always-visible Compact Top Bar -->
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2 flex-wrap min-w-0">
+          <h1 class="text-base sm:text-lg font-bold text-slate-900 truncate">2027 巴黎—布拉格—布達佩斯行程管家</h1>
+          <span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-sky-50 text-sky-800 border border-sky-200">1/1–1/11 · 2人</span>
+          <span id="miniGrandTotal" class="hidden text-xs font-bold px-2.5 py-0.5 rounded-full bg-sky-900 text-white tabular-nums">總預算 €0</span>
+        </div>
+
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button id="btnToggleHeader" type="button" aria-expanded="true" aria-controls="headerCollapsible" class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 cursor-pointer">
+            <svg id="toggleHeaderChevron" class="w-3.5 h-3.5 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+            <span id="toggleHeaderText">收合總覽</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Collapsible Overview Panel -->
+      <div id="headerCollapsible" class="mt-2.5 space-y-2.5">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
+            <p class="text-xs text-slate-500">巴黎 ORY → 布拉格（含 CK 小鎮）→ RegioJet 夜巴 → 布達佩斯 → 巴黎</p>
+            <span id="storageBadge" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">檢查存檔狀態...</span>
+          </div>
+
+          <!-- Controls: ISIC Profiles + Import/Export/Print/Reset -->
+          <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            <div class="flex items-center gap-1 bg-slate-100 px-2 py-1 rounded-lg border border-slate-200">
+              <span class="text-[11px] font-medium text-slate-700">旅伴A</span>
+              <select id="profileA" class="text-xs font-semibold bg-white border border-slate-300 rounded px-1.5 py-0.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                <option value="adult">一般成人</option>
+                <option value="isic24">ISIC (≤24歲)</option>
+                <option value="isic26">ISIC (25–26歲)</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-1 bg-slate-100 px-2 py-1 rounded-lg border border-slate-200">
+              <span class="text-[11px] font-medium text-slate-700">旅伴B</span>
+              <select id="profileB" class="text-xs font-semibold bg-white border border-slate-300 rounded px-1.5 py-0.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                <option value="adult">一般成人</option>
+                <option value="isic24">ISIC (≤24歲)</option>
+                <option value="isic26">ISIC (25–26歲)</option>
+              </select>
+            </div>
+            <button id="btnImport" type="button" class="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700" title="從 JSON 備份還原">
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i> 匯入
+            </button>
+            <input id="importFileInput" type="file" accept=".json,application/json" class="hidden">
+            <button id="btnExport" type="button" class="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700" title="下載 JSON 備份">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i> 匯出JSON
+            </button>
+            <button id="btnSaveHtml" type="button" class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-sky-300 bg-sky-50 hover:bg-sky-100 text-sky-800" title="將目前所有修改直接打包成新的 HTML 檔下載">
+              <i data-lucide="file-down" class="w-3.5 h-3.5"></i> 下載新版網頁
+            </button>
+            <button id="btnPrint" type="button" class="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700" title="列印或存為 PDF">
+              <i data-lucide="printer" class="w-3.5 h-3.5"></i> 列印
+            </button>
+            <button id="btnReset" type="button" class="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700" title="恢復預設資料">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> 重置
+            </button>
+          </div>
+        </div>
+
+        <!-- Live Budget Summary Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-2 border-t border-slate-100">
+          <div class="bg-slate-50 rounded-lg px-3 py-2 border border-slate-200/70">
+            <div class="text-[11px] text-slate-500">跨城與機場接駁</div>
+            <div id="sumIntercity" class="text-sm font-bold text-slate-900 tabular-nums mt-0.5">€0</div>
+          </div>
+          <div class="bg-slate-50 rounded-lg px-3 py-2 border border-slate-200/70">
+            <div class="text-[11px] text-slate-500">市區交通通票</div>
+            <div id="sumLocalTransit" class="text-sm font-bold text-slate-900 tabular-nums mt-0.5">€0</div>
+          </div>
+          <div class="bg-slate-50 rounded-lg px-3 py-2 border border-slate-200/70">
+            <div class="text-[11px] text-slate-500">主行程景點門票</div>
+            <div id="sumAttractions" class="text-sm font-bold text-slate-900 tabular-nums mt-0.5">€0</div>
+          </div>
+          <div class="bg-emerald-50 rounded-lg px-3 py-2 border border-emerald-200">
+            <div class="text-[11px] text-emerald-700">ISIC 已省下金額</div>
+            <div id="sumSaved" class="text-sm font-bold text-emerald-800 tabular-nums mt-0.5">€0</div>
+          </div>
+          <div class="col-span-2 sm:col-span-1 bg-sky-900 rounded-lg px-3 py-2 text-white">
+            <div class="text-[11px] text-sky-200">雙人變動總預算</div>
+            <div id="sumGrandTotal" class="text-sm font-bold tabular-nums mt-0.5">€0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs (Always Visible) -->
+      <nav class="flex gap-1 mt-2.5 overflow-x-auto border-t border-slate-100 pt-1.5" aria-label="主要分頁">
+        <button type="button" data-tab="itinerary" class="tab-btn px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg border-b-2 border-sky-700 text-sky-800 bg-sky-50/70 whitespace-nowrap">
+          每日行程 (1/1–1/11)
+        </button>
+        <button type="button" data-tab="transit" class="tab-btn px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap">
+          交通與住宿明細
+        </button>
+        <button type="button" data-tab="bonus" class="tab-btn px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap">
+          其他備選景點 &amp; ISIC
+        </button>
+        <button type="button" data-tab="vault" class="tab-btn px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap">
+          票券收納、備忘錄與工具
+        </button>
+        <button type="button" data-tab="memories" class="tab-btn px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg border-b-2 border-transparent text-slate-600 hover:text-slate-900 whitespace-nowrap">
+          旅遊回憶牆
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 mt-5">
+
+    <!-- TAB 1: EDITABLE DAILY ITINERARY -->
+    <section id="tab-itinerary" class="space-y-4">
+      <div id="daysListToolbar" class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-900 no-print">
+        <div>
+          <strong>小提示：</strong>點擊任何一天的標題或「查看詳情」可進入單日深度規劃頁（含交通動線、景點介紹與美食建議，皆可直接編輯）。
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button id="btnAddDay" type="button" class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-sky-700 text-white font-semibold hover:bg-sky-800"><i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i> 新增一天</button>
+          <button id="btnExpandAllDays" type="button" class="px-2 py-1 rounded bg-white border border-amber-300 text-amber-900 font-semibold hover:bg-amber-100">全部展開</button>
+          <button id="btnCollapseAllDays" type="button" class="px-2 py-1 rounded bg-white border border-amber-300 text-amber-900 font-semibold hover:bg-amber-100">全部收合</button>
+        </div>
+      </div>
+
+      <div id="daysContainer" class="space-y-4"></div>
+      <div id="dayDetailView" class="hidden space-y-4"></div>
+    </section>
+
+    <!-- TAB 2: TRANSIT & ACCOMMODATIONS -->
+    <section id="tab-transit" class="hidden space-y-5">
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h2 class="text-base font-bold text-slate-900">跨城移動、機場接駁與市區通票（雙人）</h2>
+            <p class="text-xs text-slate-500 mt-0.5">可勾選是否計入總預算，或點擊「編輯」調整實際票價（如廉航托運行李加購）。</p>
+          </div>
+          <button id="btnAddTransit" type="button" class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-sky-700 hover:bg-sky-800 text-white">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> 新增交通項目
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-sm">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500">
+                <th class="py-3 px-4 w-10">計入</th>
+                <th class="py-3 px-3">類型</th>
+                <th class="py-3 px-3">日期與區段</th>
+                <th class="py-3 px-3">方式與說明</th>
+                <th class="py-3 px-3">ISIC 優惠規則</th>
+                <th class="py-3 px-3 text-right">雙人費用</th>
+                <th class="py-3 px-4 text-right">操作</th>
+              </tr>
+            </thead>
+            <tbody id="transitTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Editable Accommodations Section -->
+      <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+          <div>
+            <h3 id="accSummaryTitle" class="text-base font-bold text-slate-900">住宿明細（可編輯）</h3>
+            <p class="text-xs text-slate-500 mt-0.5">新增或修改住宿價格後，會同步更新「票券收納、備忘錄與工具」頁面的總旅費估計。</p>
+          </div>
+          <button id="btnAddAcc" type="button" class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-sky-700 hover:bg-sky-800 text-white shrink-0">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> 新增住宿
+          </button>
+        </div>
+        <div id="accGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs"></div>
+      </div>
+    </section>
+
+    <!-- TAB 3: BONUS ATTRACTIONS & ISIC DIRECTORY (NOW EDITABLE & ADDABLE!) -->
+    <section id="tab-bonus" class="hidden space-y-5">
+      <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-sm">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-base font-bold text-slate-900">其他備選景點 &amp; ISIC 優惠總表（支援自訂新增）</h2>
+            <p class="text-xs text-slate-500 mt-0.5">捷克多數博物館接受 ≤26 歲 ISIC；匈牙利國營館多限 EEA 公民，非歐盟 ISIC 主要適用國會大廈（≤24歲）、聖殿、漁人堡、遊船與菸草街會堂。</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <select id="bonusCityFilter" class="text-xs font-medium border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white">
+              <option value="all">全部城市</option>
+              <option value="Prague">布拉格 Prague</option>
+              <option value="CK">庫倫洛夫 CK</option>
+              <option value="Budapest">布達佩斯 Budapest</option>
+              <option value="Paris">巴黎 Paris</option>
+            </select>
+            <select id="bonusIsicFilter" class="text-xs font-medium border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white">
+              <option value="all">全部 ISIC 狀態</option>
+              <option value="yes">有 ISIC / 青年優惠</option>
+              <option value="no">無非歐盟 ISIC 優惠</option>
+            </select>
+            <button id="btnAddBonus" type="button" class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-sky-700 hover:bg-sky-800 text-white">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> 新增備選景點
+            </button>
+          </div>
+        </div>
+
+        <div id="bonusGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-5"></div>
+      </div>
+    </section>
+
+    <!-- TAB 4: TICKET VAULT, MEMOS, CHECKLIST & CURRENCY CONVERTER -->
+    <section id="tab-vault" class="hidden space-y-5">
+
+      <!-- Quick Currency Converter + Extra Spending Estimator -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-sm font-bold text-slate-900 flex items-center gap-1.5"><i data-lucide="arrow-left-right" class="w-4 h-4 text-sky-700"></i> 即時四幣換算器</h2>
+            <span class="text-[11px] text-slate-400">1€ ≈ 36 NT$ · 24.43 CZK · 373.55 HUF</span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">歐元 EUR (€)</label>
+              <input id="convEUR" type="number" step="0.1" value="10" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 font-mono font-semibold text-slate-900">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">捷克克朗 CZK</label>
+              <input id="convCZK" type="number" step="1" value="244" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 font-mono font-semibold text-slate-900">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">匈牙利福林 HUF</label>
+              <input id="convHUF" type="number" step="10" value="3736" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 font-mono font-semibold text-slate-900">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">新台幣 TWD</label>
+              <input id="convTWD" type="number" step="10" value="360" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 font-mono font-semibold text-sky-800 bg-sky-50/40">
+            </div>
+          </div>
+        </div>
+
+        <!-- Daily Food & Misc Budget Calculator -->
+        <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="text-sm font-bold text-slate-900 flex items-center gap-1.5"><i data-lucide="wallet" class="w-4 h-4 text-emerald-700"></i> 總旅費含餐飲估計（10天雙人）</h2>
+            <span id="foodTotalLabel" class="text-xs font-bold text-emerald-700 tabular-nums">餐飲 €800</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-xs text-slate-600 whitespace-nowrap">雙人每日餐飲:</span>
+            <input id="foodPerDaySlider" type="range" min="40" max="180" step="5" value="80" class="flex-1 accent-sky-700">
+            <span id="foodPerDayVal" class="text-xs font-mono font-bold text-slate-900 w-16 text-right">€80/天</span>
+          </div>
+          <div id="allInEstimate" class="mt-2.5 pt-2.5 border-t border-slate-100 text-xs text-slate-600 flex flex-wrap justify-between gap-2 tabular-nums"></div>
+        </div>
+      </div>
+
+      <!-- Ticket & Confirmation Vault -->
+      <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+          <div>
+            <h2 class="text-base font-bold text-slate-900 flex items-center gap-1.5"><i data-lucide="ticket" class="w-4 h-4 text-sky-700"></i> 門票、訂位代號與憑證收納夾</h2>
+            <p class="text-xs text-slate-500 mt-0.5">已自動整理您上傳的班機與訂房代號；可上傳門票截圖/QR Code 或貼上電子票連結，點擊代號即可一鍵複製。</p>
+          </div>
+          <button id="btnAddTicket" type="button" class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-sky-700 hover:bg-sky-800 text-white shrink-0">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> 新增門票 / 憑證
+          </button>
+        </div>
+        <div id="ticketsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5"></div>
+      </div>
+
+      <!-- Freeform Memos + Pre-Trip Checklist -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <!-- Freeform Memos (7 cols) -->
+        <div class="lg:col-span-7 bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-sm">
+          <div class="flex items-center justify-between gap-2 mb-3">
+            <h2 class="text-base font-bold text-slate-900 flex items-center gap-1.5"><i data-lucide="sticky-note" class="w-4 h-4 text-amber-600"></i> 自由備忘錄（美食、購物、隨手記）</h2>
+            <button id="btnAddMemo" type="button" class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> 新增筆記
+            </button>
+          </div>
+          <div id="memosContainer" class="space-y-3"></div>
+        </div>
+
+        <!-- Pre-trip Checklist (5 cols) -->
+        <div class="lg:col-span-5 bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-sm">
+          <div class="flex items-center justify-between gap-2 mb-3">
+            <h2 class="text-base font-bold text-slate-900 flex items-center gap-1.5"><i data-lucide="check-square" class="w-4 h-4 text-emerald-700"></i> 行前預約與行李清單</h2>
+            <span id="checklistProgress" class="text-xs font-semibold text-emerald-700 tabular-nums">0/0</span>
+          </div>
+          <form id="checklistAddForm" class="flex gap-2 mb-3">
+            <input id="checklistInput" type="text" placeholder="輸入待辦或必帶物品..." class="flex-1 text-xs border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500">
+            <button type="submit" class="px-3 py-2 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-900 text-white">加入</button>
+          </form>
+          <div id="checklistContainer" class="space-y-2 max-h-96 overflow-y-auto pr-1"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- TAB 5: TRAVEL MEMORIES JOURNAL -->
+    <section id="tab-memories" class="hidden space-y-5">
+      <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-base font-bold text-slate-900 flex items-center gap-1.5"><i data-lucide="camera" class="w-4 h-4 text-rose-600"></i> 旅遊回憶牆（照片＋日記）</h2>
+            <p class="text-xs text-slate-500 mt-0.5">記錄每天拍到的風景、美食與小故事；照片會自動壓縮存檔，回國後也能按「下載新版網頁」或「列印」永久保存。</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <select id="memoryTagFilter" class="text-xs font-medium border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white">
+              <option value="all">全部標籤</option>
+              <option value="絕美風景">絕美風景</option>
+              <option value="美食紀錄">美食紀錄</option>
+              <option value="旅伴日常">旅伴日常</option>
+              <option value="超推薦">超推薦</option>
+              <option value="踩雷提醒">踩雷提醒</option>
+            </select>
+            <button id="btnAddMemory" type="button" class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white shrink-0">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> 新增回憶
+            </button>
+          </div>
+        </div>
+
+        <div id="memoriesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-5"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Generic Edit / Add Modal (Itinerary / Transit / Bonus) -->
+  <div id="editModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-backdrop">
+    <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full border border-slate-200 overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between">
+        <h3 id="modalTitle" class="text-base font-bold text-slate-900">編輯項目</h3>
+        <button id="btnCloseModal" type="button" class="text-slate-400 hover:text-slate-700 p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="modalForm" class="p-5 space-y-3 text-sm">
+        <input type="hidden" id="mMode">
+        <input type="hidden" id="mDayId">
+        <input type="hidden" id="mItemId">
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label id="mTimeLabel" class="block text-xs font-semibold text-slate-700 mb-1">時段</label>
+            <input id="mTime" type="text" placeholder="09:30" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+            <select id="mCitySelect" class="hidden w-full border border-slate-300 rounded-lg px-2.5 py-2 text-sm bg-white">
+              <option value="Prague">布拉格 Prague</option>
+              <option value="CK">庫倫洛夫 CK</option>
+              <option value="Budapest">布達佩斯 Budapest</option>
+              <option value="Paris">巴黎 Paris</option>
+            </select>
+          </div>
+          <div class="col-span-2">
+            <label class="block text-xs font-semibold text-slate-700 mb-1">名稱</label>
+            <input id="mName" type="text" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">幣別</label>
+            <select id="mCurrency" class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-sm bg-white">
+              <option value="CZK">CZK (克朗)</option>
+              <option value="HUF">HUF (福林)</option>
+              <option value="EUR">EUR (歐元)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">成人單價</label>
+            <input id="mAdult" type="number" step="0.01" min="0" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">ISIC 單價</label>
+            <input id="mIsic" type="number" step="0.01" min="0" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">ISIC 適用條件</label>
+            <select id="mIsicRule" class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-sm bg-white">
+              <option value="none">無非歐盟 ISIC 優惠</option>
+              <option value="26">ISIC 有效 (≤26歲)</option>
+              <option value="24">ISIC 有效 (限 ≤24歲)</option>
+              <option value="student">一般學生 / ISIC 皆可</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">ISIC 說明標籤</label>
+            <input id="mIsicNote" type="text" placeholder="例：ISIC ≤26 享優待" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">交通方式 / 備註</label>
+          <textarea id="mNotes" rows="2" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" id="btnCancelModal" class="px-4 py-2 text-xs font-semibold rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">取消</button>
+          <button type="submit" class="px-4 py-2 text-xs font-semibold rounded-lg bg-sky-700 text-white hover:bg-sky-800">儲存變更</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Day Modal (Add / Edit Day) -->
+  <div id="dayModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-backdrop">
+    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full border border-slate-200 overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between">
+        <h3 id="dayModalTitle" class="text-base font-bold text-slate-900">新增行程日期</h3>
+        <button id="btnCloseDayModal" type="button" class="text-slate-400 hover:text-slate-700 p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="dayForm" class="p-5 space-y-3 text-sm">
+        <input type="hidden" id="dyId">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">日期（含星期）</label>
+            <input id="dyDate" type="text" required placeholder="例：1/12 (二)" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">所在城市</label>
+            <input id="dyCity" type="text" required placeholder="例：巴黎" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">當日主題標題</label>
+          <input id="dyTitle" type="text" required placeholder="例：羅浮宮、奧賽美術館與塞納河" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">當日住宿 / 交通通票備註</label>
+          <input id="dyHotel" type="text" placeholder="例：巴黎市區飯店 (Navigo 週票)" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div id="dyInsertPosWrap">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">插入位置</label>
+          <select id="dyInsertPos" class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-sm bg-white">
+            <option value="end">加到行程最後一天</option>
+            <option value="start">加到行程最前面（例：12/25–12/31 巴黎）</option>
+          </select>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" id="btnCancelDayModal" class="px-4 py-2 text-xs font-semibold rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">取消</button>
+          <button type="submit" class="px-4 py-2 text-xs font-semibold rounded-lg bg-sky-700 text-white hover:bg-sky-800">儲存日期</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Accommodation Modal -->
+  <div id="accModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-backdrop">
+    <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full border border-slate-200 overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between">
+        <h3 id="accModalTitle" class="text-base font-bold text-slate-900">編輯住宿明細</h3>
+        <button id="btnCloseAccModal" type="button" class="text-slate-400 hover:text-slate-700 p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="accForm" class="p-5 space-y-3 text-sm">
+        <input type="hidden" id="accId">
+        <div class="grid grid-cols-3 gap-3">
+          <div class="col-span-2">
+            <label class="block text-xs font-semibold text-slate-700 mb-1">飯店 / 公寓名稱</label>
+            <input id="accName" type="text" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">日期與晚數</label>
+            <input id="accDates" type="text" placeholder="1/11–1/14, 3晚" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">地址 / 交通位置</label>
+          <input id="accAddress" type="text" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">總房價 (EUR 歐元)</label>
+            <input id="accEur" type="number" step="0.01" min="0" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">入住 / 退房時間</label>
+            <input id="accTimes" type="text" placeholder="15:00入住 / 11:00退房" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">確認碼</label>
+            <input id="accCode" type="text" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm font-mono">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">PIN 碼 / 備註</label>
+            <input id="accPin" type="text" placeholder="PIN 0306" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" id="btnCancelAccModal" class="px-4 py-2 text-xs font-semibold rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">取消</button>
+          <button type="submit" class="px-4 py-2 text-xs font-semibold rounded-lg bg-sky-700 text-white hover:bg-sky-800">儲存住宿</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Ticket Vault Modal -->
+  <div id="ticketModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-backdrop">
+    <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full border border-slate-200 overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between">
+        <h3 id="ticketModalTitle" class="text-base font-bold text-slate-900">新增門票 / 憑證</h3>
+        <button id="btnCloseTicketModal" type="button" class="text-slate-400 hover:text-slate-700 p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="ticketForm" class="p-5 space-y-3 text-sm">
+        <input type="hidden" id="tkId">
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">分類</label>
+            <select id="tkCategory" class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-sm bg-white">
+              <option value="景點門票">景點門票</option>
+              <option value="機票">機票</option>
+              <option value="巴士/火車">巴士/火車</option>
+              <option value="住宿確認單">住宿確認單</option>
+              <option value="其他憑證">其他憑證</option>
+            </select>
+          </div>
+          <div class="col-span-2">
+            <label class="block text-xs font-semibold text-slate-700 mb-1">憑證標題</label>
+            <input id="tkTitle" type="text" required placeholder="例：匈牙利國會大廈門票 (1/9 10:00)" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">訂位代號 / 確認碼 / PIN</label>
+            <input id="tkCode" type="text" placeholder="例：PNR / 訂單號" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm font-mono">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">使用日期</label>
+            <input id="tkDate" type="text" placeholder="例：1/9 10:00" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">電子票連結 URL（選填）</label>
+          <input id="tkUrl" type="url" placeholder="https://..." class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">上傳門票截圖 / QR Code 圖片（選填，將自動壓縮存檔）</label>
+          <input id="tkFile" type="file" accept="image/*" class="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100">
+          <div id="tkImagePreviewWrap" class="hidden mt-2 relative">
+            <img id="tkImagePreview" src="" alt="票券預覽" class="max-h-36 rounded-lg border border-slate-200 object-contain">
+            <button id="btnClearTkImage" type="button" class="mt-1 text-[11px] text-rose-600 underline">移除已附圖片</button>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">備註</label>
+          <textarea id="tkNote" rows="2" placeholder="集合地點、報到提醒、PIN 碼等..." class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"></textarea>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" id="btnCancelTicketModal" class="px-4 py-2 text-xs font-semibold rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">取消</button>
+          <button type="submit" class="px-4 py-2 text-xs font-semibold rounded-lg bg-sky-700 text-white hover:bg-sky-800">儲存憑證</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Memory Modal -->
+  <div id="memoryModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-backdrop">
+    <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full border border-slate-200 overflow-hidden max-h-[90vh] flex flex-col">
+      <div class="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between shrink-0">
+        <h3 id="memoryModalTitle" class="text-base font-bold text-slate-900">新增旅遊回憶</h3>
+        <button id="btnCloseMemoryModal" type="button" class="text-slate-400 hover:text-slate-700 p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="memoryForm" class="p-5 space-y-3 text-sm overflow-y-auto">
+        <input type="hidden" id="memId">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">日期與地點</label>
+            <input id="memDate" type="text" required placeholder="例：1/5 · CK 小鎮" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">心情 / 分類標籤</label>
+            <select id="memTag" class="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-sm bg-white">
+              <option value="絕美風景">絕美風景</option>
+              <option value="美食紀錄">美食紀錄</option>
+              <option value="旅伴日常">旅伴日常</option>
+              <option value="超推薦">超推薦</option>
+              <option value="踩雷提醒">踩雷提醒</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">回憶標題</label>
+          <input id="memTitle" type="text" required placeholder="例：彩繪塔上看下來的童話雪景" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">上傳照片（單則最多 12 張，大容量自動壓縮存檔）</label>
+          <input id="memFiles" type="file" accept="image/*" multiple class="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-rose-50 file:text-rose-700 hover:file:bg-rose-100">
+          <div id="memPhotosPreview" class="grid grid-cols-3 gap-2 mt-2"></div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">旅遊日記 / 心得</label>
+          <textarea id="memBody" rows="4" required placeholder="寫下當天的趣事、好吃的餐廳或感想..." class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"></textarea>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" id="btnCancelMemoryModal" class="px-4 py-2 text-xs font-semibold rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">取消</button>
+          <button type="submit" class="px-4 py-2 text-xs font-semibold rounded-lg bg-rose-600 text-white hover:bg-rose-700">儲存回憶</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Image Lightbox Modal -->
+  <div id="lightboxModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-backdrop">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-4 relative">
+      <div class="flex items-center justify-between mb-2">
+        <span id="lightboxTitle" class="text-sm font-bold text-slate-900">憑證圖片預覽</span>
+        <button id="btnCloseLightbox" type="button" class="p-1 rounded hover:bg-slate-100 text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <img id="lightboxImg" src="" alt="放大預覽" class="max-h-[75vh] w-full object-contain rounded-lg border border-slate-200">
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden bg-slate-900 text-white text-xs font-medium px-4 py-2.5 rounded-xl shadow-lg"></div>
+
+<script>
+const RATES = { EUR: 1, CZK: 1 / 24.43, HUF: 1 / 373.55, TWD: 36.0 };
+const STORAGE_KEY = 'trip_planner_2027_v4';
+
+const DEFAULT_DAY_GUIDES = {
+  d1: {
+    route: '【巴黎出發】由巴黎巴紐商務酒店 (204 Av. Aristide Briand) 步行至 RER B Bagneux 站搭車至 Antony 轉 Orlyval（約 30 分、€14/人），或直接叫 Uber/Bolt 直達奧利第 3 航廈（約 20 分、雙人 €24–€30）。\n【布拉格進城】PRG 機場搭 59 號無軌電車（約 15 分）至 Nádraží Veleslavín 轉地鐵綠線 A → Muzeum 轉紅線 C 直達 Opatov 站（總計約 55 分，用 PID 90 分鐘票 46 CZK）。',
+    highlights: '1/1 元旦布拉格多數小店較晚開，但老城廣場、瓦茨拉夫廣場與查理大橋全年開放且充滿新年燈飾。15:30 辦理 Opatov 公寓入住稍作休息後，搭 C 線回 Muzeum 步行下坡逛瓦茨拉夫廣場，整點在老城廣場看天文鐘報時，再沿卡爾洛娃街散步至查理大橋欣賞冬日倒影。',
+    food: '晚餐推薦老城區傳統捷克料理（烤豬腳 Pečené vepřové koleno、燉牛肉配麵包餃 Svíčková 與皮爾森生啤），或在老城廣場市集買熱紅酒 Svařák 與現烤煙囪捲暖身。'
+  },
+  d2: {
+    route: '由 Opatov 搭地鐵 C 線至 Muzeum 轉 A 線至 Malostranská，再轉搭 22 號復古路面電車上山至 Pražský hrad 站，可免去大段爬坡。下午從城堡南側下山至小城區，搭 22 號電車至 Újezd 站，持 PID 72 小時通票免費搭佩特任登山纜車上山。',
+    highlights: '【布拉格城堡】冬季室內展館 09:00–16:00 開放，建議 09:15 抵達安檢避開團客。主套票（成人 450 / ISIC ≤26 歲 300 CZK）含聖維特大教堂慕夏彩繪玻璃、舊皇宮弗拉迪斯拉夫大廳、聖喬治聖殿與卡夫卡曾居住的黃金巷 22 號。\n【佩特任瞭望塔】一月日落約 16:15，建議 15:15 登塔（299 階樓梯），可將整個布拉格百塔紅屋頂與伏爾塔瓦河夕陽盡收眼底。',
+    food: '午餐可在小城區（Malá Strana）或城堡旁的斯特拉霍夫修道院啤酒廠（Klášterní pivovar Strahov）品嚐修道院精釀與大蒜湯；下山後可在 Café Savoy 喝熱可可。'
+  },
+  d3: {
+    route: '【推薦跟一日小團】從布拉格市中心集合搭專車（車程約 2h），直接串聯德國薩克森瑞士「巴斯泰橋」＋捷克波希米亞瑞士（蒂薩納尼亞雪岩或普拉夫奇茨卡拱門），冬天 16:15 天黑最省心！\n【省錢自助】從布拉格中央車站搭火車經 Děčín 至德國 Kurort Rathen，搭渡輪過易北河再健行約 40 分上橋（單程約 2.5–3h，務必攜帶護照）。',
+    highlights: '【巴斯泰橋 Bastei Bridge】高懸易北河峽谷 194 公尺的百年砂岩拱橋，全年 24 小時免費開放！冬日松林與奇岩覆雪宛如魔幻電影場景。\n【防滑提醒】一月山區步道易結冰，務必穿防滑防水登山靴、防風羽絨與手套；若報名含冰爪與午餐的一日團會更輕鬆。',
+    food: '多數一日團含捷克邊境山屋熱食午餐（或於巴斯泰山頂餐廳用餐）；若自助前往，建議於布拉格超市先買好熱飲與乾糧帶上山。'
+  },
+  d4: {
+    route: '由 Opatov 搭地鐵 C 線至 Florenc（或轉 B 線至 Zličín）搭乘 RegioJet / FlixBus 直達巴士前往卡羅維瓦利（車程約 1h45m–2h，單程約 €7–€11，持 ISIC 18–26 歲捷克國內巴士約 5 折）。抵達後步行 10 分鐘即進入彩色溫泉河谷區。',
+    highlights: '【溫泉山谷與迴廊】整座小鎮沿著泰普拉河谷與覆雪山坡而建，色彩繽紛宛如童話山城！必逛磨坊溫泉長廊、木造市集迴廊與 72°C 噴泉大溫泉迴廊（全部免費參觀）。\n【戴安娜纜車與觀景台】從普普大飯店旁搭復古登山纜車（來回 165 CZK，每 15 分一班）5 分鐘登頂，免費上觀景台俯瞰整個覆雪溫泉山谷全景！',
+    food: '必買當地特色「溫泉杯」裝天然礦泉水喝、現烤熱騰騰的溫泉薄餅（Oplatky），以及品嚐捷克第 13 種溫泉「貝赫洛夫卡草本利口酒（Becherovka）」。'
+  },
+  d5: {
+    route: '【往返 CK 小鎮】由 Opatov 搭 C 線至 Florenc 轉 B 線至 Anděl 站，出站步行 2 分鐘即達 Praha, Na Knížecí 巴士總站。搭乘 RegioJet 黃色巴士直達 Český Krumlov, Špičák 或 AN 總站（車程約 2h45m；持 ISIC 18–26 歲享捷克國內巴士約 5 折！）。建議去程 08:00 或 09:00、回程 17:00 或 18:00。',
+    highlights: '【冬季限定攻略】CK 城堡內部導覽路線（Tour I/II）每年 11 月至隔年 3 月休館，但城堡外庭、斗篷橋觀景台（必拍Ｓ型伏爾塔瓦河彎道與紅屋頂全景）、護城河熊池完全免費開放，且「城堡博物館與彩繪塔」週二至週日照常開放（2026 冬季統一票價 80 CZK）。登彩繪塔俯瞰雪景童話小鎮超值！',
+    food: '必試地窖餐廳 Krčma v Šatlavské ulici（炭火直烤豬肋排與牛排，極熱門建議事先訂位或 11:30 剛開門就去），飯後可在老城巷弄買手工木偶或波丹尼草本皂。'
+  },
+  d6: {
+    route: '11:00 前退房，搭地鐵 C 線直達 Florenc 站（免轉車、約 20 分）。將大件行李寄放於 ÚAN Florenc 巴士站置物櫃或寄存室（約 120 CZK/件），輕裝進城採買。晚上 22:30 返回 Florenc 月台候車，23:00 搭乘 RegioJet 直達夜巴前往布達佩斯。',
+    highlights: '這天排作彈性慢活日：補逛哈維爾市集（Havelské tržiště）買天文鐘磁鐵與捷克水晶、去 Palladium 商場或曼菲蘿（Manufaktura）採買伴手禮，傍晚找間舒服的餐廳吃飽並洗漱整理，準備搭夜車。車上提供免費熱飲與插座，建議備好頸枕、耳塞與保暖外套。',
+    food: '晚餐可在 Florenc 或共和國廣場周邊吃飽再上車，並於超市（Billa / Albert）買好水與隔天清晨小點心。'
+  },
+  d7: {
+    route: '06:05 抵達布達佩斯 Népliget 巴士站，直接下樓轉地鐵藍線 M3 往北直達 Lehel tér 站（約 20 分，無須轉車）或前一站 Nyugati pályaudvar 西站寄放行李。於 BudapestGO App 啟用 72 小時交通卡（5,750 HUF）。',
+    highlights: '【聖伊什特萬聖殿】匈牙利最大教堂，珍寶館供奉開國國王聖伊什特萬的「聖右手」，搭電梯上 96 公尺圓頂可 360 度環視佩斯市景（聯票 6,200 / 學生 4,800 HUF）。\n【16:00 入住補眠】回 33 Pannónia utca 公寓放行李梳洗休息。\n【16:30 多瑙河遊船】一月 16:20 日落，搭 16:30–17:30 班次可一次收齊黃昏藍調與國會大廈金色點燈！',
+    food: '清晨寄包後可去中央大市場（06:00 開門）或西站附近的百年復古麥當勞／早午餐店（如 Cirkusz、Á Table）吃熱騰騰早餐。'
+  },
+  d8: {
+    route: '從住宿步行至 Jászai Mari tér 或搭 M3 至 Deák Ferenc tér 轉乘 16 號公車直接開上布達城堡山（涵蓋在 72h 交通卡內，免花錢搭昂貴的城堡山纜車）。下午沿塞切尼鏈橋步行過河回佩斯。',
+    highlights: '【漁人堡】新羅馬式白色迴廊與七座尖塔是拍攝國會大廈與多瑙河的頭號機位！下層迴廊免費、上層露台 1,700 HUF（學生半價 850 HUF）。建議 09:30 前抵達光線最柔和。\n【馬加什教堂】色彩斑斕的 Zsolnay 陶瓷馬賽克屋頂，內部哥德式彩繪壁畫與茜茜公主加冕歷史極具看頭。\n【布達皇宮庭園】可順道眺望多瑙河與自由橋。',
+    food: '上午在城堡區品嚐百年甜點店 Ruszwurm 的招牌奶油千層派（Krémes）；下午過鏈橋後前往「世界最美咖啡館」紐約咖啡館（New York Café，建議提前預約或避開正午尖峰）。'
+  },
+  d9: {
+    route: '上午從住宿散步沿多瑙河畔（或搭經典黃色 2 號路面電車）約 12 分鐘即達匈牙利國會大廈。下午搭百年 M1 黃線地鐵至 Széchenyi fürdő 站直達溫泉浴場。',
+    highlights: '【匈牙利國會大廈】歐洲最壯麗的哥德復興建築，45 分鐘導覽包含金色大階梯、圓頂大廳的匈牙利聖冠與議事廳。2026 非歐盟成人 14,000 HUF、非歐盟學生 6–24 歲持 ISIC 半價 7,000 HUF，務必提早於官網預訂！\n【多瑙河畔之鞋】國會南側步行 5 分鐘，紀念二戰受難者的深刻雕塑。\n【塞切尼溫泉】在零度冬日泡進 38°C 巴洛克鵝黃色露天大溫泉池，是布達佩斯最難忘的體驗（週六含置物櫃 14,800 HUF，記得自備泳衣、拖鞋與毛巾）。',
+    food: '國會參觀後可在周邊吃匈牙利牛肉湯（Gulyás）與紅椒雞（Csirkepaprikás）；泡完溫泉晚上可到猶太區（District VII）吃街頭美食 Karaván 市集。'
+  },
+  d10: {
+    route: '銜接啟用 BKK 24 小時交通卡（2,750 HUF），搭乘世界第二古老的地鐵 M1 黃線，依序串聯英雄廣場、安德拉什大街（世界遺產林蔭大道）、國家歌劇院與猶太區。',
+    highlights: '【英雄廣場與城市公園】欣賞千年紀念碑與沃伊達奇城堡（冬季旁有歐洲最大露天溜冰場）。\n【安德拉什大街與歌劇院】精品街與新文藝復興建築巡禮，若有空可加選附近的「恐怖之屋博物館」或「菸草街猶太會堂」（注意週六休館、週日開放）。\n【Szimpla Kert 廢墟酒吧】週日白天還有農夫市集，晚上則變身布達佩斯最魔幻的廢墟酒吧文化地標。',
+    food: '注意中央大市場週日通常休市，若想買鵝肝醬罐頭、紅椒粉與貴腐酒（Tokaji Aszú），建議在週六或大型超市（Spar / Prima）採買更便宜！'
+  },
+  d11: {
+    route: '11:00 前辦理退房，搭 M3 地鐵至 Deák Ferenc tér（或 Kálvin tér）轉乘 100E 機場快線巴士直達布達佩斯李斯特·費倫茨機場（BUD，車程約 35–40 分，專用票 2,500 HUF/人，上車可直接刷感應式信用卡）。\n【返抵巴黎】建議搭 Wizz Air 直飛奧利機場（ORY），再搭巴黎地鐵 14 號線（€14/人）30 分鐘內直達巴黎市中心，銜接 1/14 長榮 BR088 返台。',
+    highlights: '退房前最後確認護照、ISIC 卡、充電器與退稅單據；若有加購廉航托運行李，請務必提前於航空公司 App 完成線上報到（Online Check-in）避免機場高額手續費。',
+    food: '退房前可在公寓附近（Újlipótváros 區 Pozsonyi út）享受悠閒的佩斯文青早午餐再出發去機場。'
+  }
+};
+
+const DEFAULT_DATA = {
+  profileA: 'adult',
+  profileB: 'adult',
+  headerCollapsed: false,
+  foodPerDay: 80,
+  collapsedDays: {},
+  days: [
+    {
+      id: 'd1', date: '1/1 (五)', city: '巴黎 → 布拉格', title: '飛抵布拉格與老城夜色',
+      hotel: 'Sunny minimalistic flat near metro Opatov (15:30後入住)',
+      items: [
+        { id: 'd1_1', time: '上午', name: '法國泛航 TO4390 (ORY → PRG)', currency: 'CZK', adult: 0, isic: 0, isicRule: 'none', isicNote: '已購票 (PNR: DI85SK)', notes: '從巴紐飯店搭 RER B+Orlyval 或叫車至 ORY 第3航廈；抵布拉格後搭 59號無軌電車轉地鐵 A→C 至 Opatov。', included: true },
+        { id: 'd1_2', time: '16:30', name: '瓦茨拉夫廣場 & 老城廣場天文鐘', currency: 'CZK', adult: 0, isic: 0, isicRule: 'none', isicNote: '戶外免費', notes: '整點看天文鐘報時、散步至查理大橋看夜景。', included: true }
+      ]
+    },
+    {
+      id: 'd2', date: '1/2 (六)', city: '布拉格', title: '布拉格城堡區與佩特任山日落',
+      hotel: 'Opatov 公寓 (啟用 PID 72h 通票)',
+      items: [
+        { id: 'd2_1', time: '09:30', name: '布拉格城堡主套票 (Main Circuit)', currency: 'CZK', adult: 450, isic: 300, isicRule: '26', isicNote: 'ISIC ≤26歲 300 CZK', notes: '含聖維特大教堂、舊皇宮、聖喬治聖殿、黃金巷（冬季開放至 16:00）。', included: true },
+        { id: 'd2_2', time: '14:30', name: '佩特任瞭望塔 (含72h通票免費搭纜車)', currency: 'CZK', adult: 250, isic: 170, isicRule: '26', isicNote: 'ISIC ≤26歲 170 CZK', notes: '佩特任纜車持 PID 72h 票免費搭乘；登塔走樓梯 250 CZK（搭電梯+150 CZK）。', included: true }
+      ]
+    },
+    {
+      id: 'd3', date: '1/3 (日)', city: '薩克森瑞士 (德捷邊境)', title: '巴斯泰橋 & 波希米亞瑞士雪谷一日遊',
+      hotel: 'Opatov 公寓 (PID 72h 第2天)',
+      items: [
+        { id: 'd3_1', time: '08:00', name: '布拉格出發：巴斯泰橋＆波希米亞瑞士冬季一日團', currency: 'EUR', adult: 78, isic: 78, isicRule: 'none', isicNote: '依團型約 €70–€149/人（自助搭火車更省）', notes: '含專車往返、巴斯泰橋（免費開放）與雪覆砂岩峽谷健行；跨入德國務必帶護照！', included: true },
+        { id: 'd3_2', time: '11:00', name: '巴斯泰橋與易北河峽谷觀景台 (Bastei Bridge)', currency: 'EUR', adult: 0, isic: 0, isicRule: 'none', isicNote: '全年免費 24h 開放', notes: '冬季穿防滑靴與保暖防風衣，日落前返抵布拉格。', included: true }
+      ]
+    },
+    {
+      id: 'd4', date: '1/4 (一)', city: '卡羅維瓦利 (Karlovy Vary)', title: '捷克最美彩色溫泉山谷一日遊',
+      hotel: 'Opatov 公寓 (PID 72h 第3天)',
+      items: [
+        { id: 'd4_1', time: '08:30', name: 'RegioJet / FlixBus 往返卡羅維瓦利', currency: 'CZK', adult: 480, isic: 240, isicRule: '26', isicNote: 'ISIC 18–26歲捷克巴士約5折', notes: '從 Florenc 或 Zličín 發車，單程約 1h45m–2h 直達溫泉小鎮。', included: true },
+        { id: 'd4_2', time: '11:00', name: '磨坊溫泉長廊、市集迴廊 & 普普大飯店散步', currency: 'CZK', adult: 0, isic: 0, isicRule: 'none', isicNote: '免費參觀', notes: '沿泰普拉河谷欣賞彩色建築，可買造型溫泉杯裝天然溫泉水喝。', included: true },
+        { id: 'd4_3', time: '14:00', name: '戴安娜登山纜車來回＋山頂觀景台 (Diana Tower)', currency: 'CZK', adult: 165, isic: 165, isicRule: 'none', isicNote: '纜車來回 165 CZK / 觀景台免費', notes: '每 15 分鐘一班，5 分鐘直達山頂俯瞰整片覆雪溫泉山谷。', included: true }
+      ]
+    },
+    {
+      id: 'd5', date: '1/5 (二)', city: '庫倫洛夫 (CK小鎮)', title: 'CK 小鎮童話一日遊（冬季限定步調）',
+      hotel: 'Opatov 公寓 (啟用 PID 24h 通票)',
+      items: [
+        { id: 'd5_1', time: '08:00', name: 'RegioJet 巴士 (Praha Na Knížecí ↔ CK)', currency: 'CZK', adult: 700, isic: 350, isicRule: '26', isicNote: 'ISIC 18–26歲捷克巴士約5折', notes: '單程約 2h45m；地鐵 B 線至 Anděl 站出站即為 Na Knížecí 巴士總站。', included: true },
+        { id: 'd5_2', time: '11:30', name: 'CK 城堡博物館與彩繪塔 (Castle Museum & Tower)', currency: 'CZK', adult: 80, isic: 80, isicRule: 'none', isicNote: '冬季統一票價 80 CZK', notes: 'CK 城堡內部導覽 1 月休館，彩繪塔與城堡博物館週二至週日開放。', included: true },
+        { id: 'd5_3', time: '14:00', name: '斯沃諾斯基廣場、斗篷橋 & 伏爾塔瓦河彎道', currency: 'CZK', adult: 0, isic: 0, isicRule: 'none', isicNote: '免費漫步', notes: '傍晚搭 17:00 或 18:00 班次返回布拉格。', included: true }
+      ]
+    },
+    {
+      id: 'd6', date: '1/6 (三)', city: '布拉格 → 夜巴', title: '市集慢活、寄放行李與跨國夜車',
+      hotel: '夜宿 RegioJet 巴士 (23:00 → 06:05)',
+      items: [
+        { id: 'd6_1', time: '11:00', name: '退房並於 ÚAN Florenc 寄放行李', currency: 'CZK', adult: 120, isic: 120, isicRule: 'none', isicNote: '無優惠 (約120 CZK/件)', notes: '地鐵 C 線直達 Florenc，寄包後再回市區逛哈維爾市集、採買伴手禮。', included: true },
+        { id: 'd6_2', time: '23:00', name: 'RegioJet 夜巴前往布達佩斯 Népliget', currency: 'EUR', adult: 0, isic: 0, isicRule: 'none', isicNote: '費用計入跨城交通分頁', notes: '23:00 發車，06:05 抵布達佩斯 Népliget（可直轉地鐵 M3）。', included: true }
+      ]
+    },
+    {
+      id: 'd7', date: '1/7 (四)', city: '布達佩斯', title: '清晨抵匈、聖伊什特萬聖殿與多瑙河遊船',
+      hotel: 'New Flower Garden (16:00後入住，啟用 BKK 72h卡)',
+      items: [
+        { id: 'd7_1', time: '06:45', name: 'M3 直達 Lehel tér 寄包＋中央市場早餐', currency: 'HUF', adult: 1800, isic: 1800, isicRule: 'none', isicNote: '寄物費預估/件', notes: '於 Nyugati 車站或住宿周邊置物櫃先寄放行李，16:00 再入住補眠。', included: true },
+        { id: 'd7_2', time: '10:30', name: '聖伊什特萬聖殿全區聯票 (大殿+珍寶館+圓頂)', currency: 'HUF', adult: 6200, isic: 4800, isicRule: 'student', isicNote: 'ISIC 學生優待 4,800 HUF', notes: '可搭電梯上 96 公尺圓頂看市景。', included: true },
+        { id: 'd7_3', time: '16:30', name: '多瑙河觀光遊船 (1 小時黃昏夜景)', currency: 'HUF', adult: 5000, isic: 3500, isicRule: 'student', isicNote: '學生票 3,500 HUF (Mahart)', notes: '1 月日落約 16:20，選 16:30 班次可一次看齊藍調時刻與國會點燈。', included: true }
+      ]
+    },
+    {
+      id: 'd8', date: '1/8 (五)', city: '布達佩斯', title: '布達城堡山、漁人堡與馬加什教堂',
+      hotel: 'New Flower Garden (BKK 72h 第2天)',
+      items: [
+        { id: 'd8_1', time: '09:30', name: '漁人堡上層觀景露台 (Fisherman\'s Bastion)', currency: 'HUF', adult: 1700, isic: 850, isicRule: 'student', isicNote: '學生半價 850 HUF', notes: '搭 16 號公車直接上山免搭纜車；下層迴廊免費。', included: true },
+        { id: 'd8_2', time: '11:00', name: '馬加什教堂 (Matthias Church)', currency: 'HUF', adult: 3400, isic: 3400, isicRule: 'none', isicNote: '現場詢學生票 (無固定ISIC表價)', notes: '彩色馬賽克屋頂必拍，內部壁畫極精緻。', included: true },
+        { id: 'd8_3', time: '15:00', name: '塞切尼鏈橋散步 → 紐約咖啡館', currency: 'HUF', adult: 0, isic: 0, isicRule: 'none', isicNote: '步行免費', notes: '步行過鏈橋返回佩斯側喝咖啡。', included: true }
+      ]
+    },
+    {
+      id: 'd9', date: '1/9 (六)', city: '布達佩斯', title: '匈牙利國會大廈與塞切尼暖冬溫泉',
+      hotel: 'New Flower Garden (BKK 72h 第3天)',
+      items: [
+        { id: 'd9_1', time: '10:00', name: '匈牙利國會大廈導覽 (非歐盟票)', currency: 'HUF', adult: 14000, isic: 7000, isicRule: '24', isicNote: '非歐盟 ISIC (限6–24歲) 半價 7,000 HUF', notes: '2026年起非歐盟成人為 14,000 HUF，務必提前上官網預訂時段！', included: true },
+        { id: 'd9_2', time: '14:30', name: '塞切尼溫泉浴場全日含置物櫃 (週六假日價)', currency: 'HUF', adult: 14800, isic: 14800, isicRule: 'none', isicNote: '無一般遊客 ISIC 折扣', notes: '自備泳衣、拖鞋、毛巾可省下現場租借費。', included: true }
+      ]
+    },
+    {
+      id: 'd10', date: '1/10 (日)', city: '布達佩斯', title: '安德拉什大街、英雄廣場與廢墟酒吧',
+      hotel: 'New Flower Garden (啟用 BKK 24h 卡)',
+      items: [
+        { id: 'd10_1', time: '10:30', name: '百年 M1 黃線地鐵 → 英雄廣場 & 城市公園', currency: 'HUF', adult: 0, isic: 0, isicRule: 'none', isicNote: '戶外免費', notes: '沿安德拉什大街逛街，可順道參觀歌劇院外觀。', included: true },
+        { id: 'd10_2', time: '20:00', name: 'Szimpla Kert 廢墟酒吧體驗', currency: 'HUF', adult: 0, isic: 0, isicRule: 'none', isicNote: '免門票 (自由點飲品)', notes: '布達佩斯最具代表性的文化夜生活地標。', included: true }
+      ]
+    },
+    {
+      id: 'd11', date: '1/11 (一)', city: '布達佩斯 → 巴黎', title: '退房搭 100E 機場巴士飛返巴黎',
+      hotel: '返回巴黎（銜接 1/14 BR088 回台）',
+      items: [
+        { id: 'd11_1', time: '10:30', name: '11:00 前退房 → Deák Ferenc tér 搭 100E 往機場', currency: 'EUR', adult: 0, isic: 0, isicRule: 'none', isicNote: '費用計入跨城交通分頁', notes: '建議選降落奧利 (ORY) 的 Wizz Air 直飛航班，進巴黎市區最省時。', included: true }
+      ]
+    }
+  ],
+  accommodations: [
+    { id: 'a1', name: '巴黎巴紐商務酒店', dates: '12/31–1/1 · 1晚', address: '204 Av. Aristide Briand, 92220 Bagneux', eur: 78.50, times: '15:00入住 / 11:00退房', code: '5497.237.807', pin: 'PIN 5557' },
+    { id: 'a2', name: 'Sunny minimalistic flat', dates: '1/1–1/6 · 5晚', address: '4 Bachova, Prague 11 (近地鐵 C 線 Opatov)', eur: 293.45, times: '15:30入住 / 11:00退房', code: '5995.583.596', pin: 'PIN 0306' },
+    { id: 'a3', name: 'New Flower Garden', dates: '1/7–1/11 · 4晚', address: '33 Pannónia utca, 1133 Budapest (近 M3 Lehel tér)', eur: 224.00, times: '16:00入住 / 11:00退房', code: '6129.198.508', pin: 'PIN 9154' }
+  ],
+  transit: [
+    { id: 't1', cat: 'intercity', label: '1/1 巴黎巴紐 → 奧利機場 (ORY)', method: 'RER B (Bagneux) 轉 Orlyval（或叫車分攤）', currency: 'EUR', adult: 14, isic: 14, isicRule: 'none', isicNote: '機場專線無 ISIC 折扣', included: true },
+    { id: 't2', cat: 'intercity', label: '1/6 布拉格 → 布達佩斯夜巴', method: 'RegioJet 23:00 Florenc → 06:05 Népliget', currency: 'EUR', adult: 20, isic: 20, isicRule: 'none', isicNote: '跨境巴士依截圖固定 €20/人', included: true },
+    { id: 't3', cat: 'intercity', label: '1/11 布達佩斯市區 → BUD 機場', method: 'BKK 100E 機場快線巴士', currency: 'HUF', adult: 2500, isic: 2500, isicRule: 'none', isicNote: '100E 專用票無學生折扣', included: true },
+    { id: 't4', cat: 'intercity', label: '1/11 BUD → 巴黎 ORY 單程機票', method: 'Wizz Air 直飛（2人合計約 €137，未含托運）', currency: 'EUR', adult: 68.5, isic: 68.5, isicRule: 'none', isicNote: '航空公司固定票價', included: true },
+    { id: 't5', cat: 'intercity', label: '1/11 巴黎奧利 ORY → 市區', method: '巴黎地鐵 14 號線直達市中心', currency: 'EUR', adult: 14, isic: 14, isicRule: 'none', isicNote: '機場特票無 ISIC 折扣', included: true },
+    { id: 't6', cat: 'local', label: '布拉格市區 72h + 24h 通票', method: 'PID Lítačka App 購票 (340 + 140 CZK)', currency: 'CZK', adult: 480, isic: 480, isicRule: 'none', isicNote: '短天期旅遊通票無 ISIC 折扣', included: true },
+    { id: 't7', cat: 'local', label: '布拉格 1/1 機場進城 + 1/6 往巴士站', method: 'PID 90 分鐘 App 單程票 (46 CZK × 2趟)', currency: 'CZK', adult: 92, isic: 92, isicRule: 'none', isicNote: '單程票無 ISIC 折扣', included: true },
+    { id: 't8', cat: 'local', label: '布達佩斯市區 72h + 24h 交通卡', method: 'BudapestGO App 購票 (5,750 + 2,750 HUF)', currency: 'HUF', adult: 8500, isic: 8500, isicRule: 'none', isicNote: '短期遊客卡無 ISIC 折扣', included: true }
+  ],
+  bonus: [
+    { id: 'b_oldtown', city: 'Prague', name: '舊市政廳與天文鐘塔 (Old Town Hall)', currency: 'CZK', adult: 450, isic: 380, isicRule: '26', isicNote: '16–26歲青年/ISIC 380 CZK', notes: '開門首小時現場購票享5折；若 1/6 退房後有空可排入。' },
+    { id: 'b_klem', city: 'Prague', name: '克萊門特學院巴洛克圖書館導覽', currency: 'CZK', adult: 380, isic: 300, isicRule: '26', isicNote: '16–26歲青年/ISIC 300 CZK', notes: '約 50 分鐘英語導覽含天文塔，建議提前網訂。' },
+    { id: 'b_jewish', city: 'Prague', name: '布拉格猶太博物館聯票 (週六休)', currency: 'CZK', adult: 420, isic: 280, isicRule: '26', isicNote: 'ISIC 學生優待 280 CZK', notes: '含老猶太公墓與多座會堂，週六公休。' },
+    { id: 'b_lukacs', city: 'Budapest', name: '聖盧卡奇溫泉 (Lukács Bath 平日全日/學生)', currency: 'HUF', adult: 7000, isic: 3800, isicRule: 'student', isicNote: '學生票 3,800 HUF / 平日17:00後亦3,800', notes: '離布達佩斯公寓最近！過瑪格麗特橋搭電車10分鐘即達，比塞切尼便宜一半以上。' },
+    { id: 'b1', city: 'Prague', name: '捷克國家博物館 (National Museum)', currency: 'CZK', adult: 360, isic: 260, isicRule: '26', isicNote: 'ISIC ≤26歲 260 CZK', notes: '瓦茨拉夫廣場盡頭新文藝復興建築，內有自然史與歷史展。' },
+    { id: 'b2', city: 'Prague', name: '斯特拉霍夫修道院圖書館 (Strahov Library)', currency: 'CZK', adult: 220, isic: 110, isicRule: '26', isicNote: 'ISIC ≤26歲半價 110 CZK', notes: '神學廳與哲學廳極壯觀，離布拉格城堡步行約 10 分鐘。' },
+    { id: 'b3', city: 'Prague', name: '高堡聖彼得與聖保羅聖殿', currency: 'CZK', adult: 130, isic: 70, isicRule: '26', isicNote: 'ISIC/學生優待 70 CZK', notes: '新哥德式雙塔教堂，旁邊是捷克名人墓園。' },
+    { id: 'b4', city: 'Prague', name: '特洛伊宮 (Troja Palace)', currency: 'CZK', adult: 200, isic: 90, isicRule: '26', isicNote: 'ISIC ≤26歲 90 CZK', notes: '巴洛克夏宮與對稱花園，人潮極少好拍照。' },
+    { id: 'b5', city: 'Prague', name: '慕夏美術館 (Mucha Museum)', currency: 'CZK', adult: 330, isic: 250, isicRule: '26', isicNote: '現場出示學生證約 250 CZK', notes: '新藝術大師阿爾豐斯·慕夏原作展，約 1 小時可逛完。' },
+    { id: 'b6', city: 'Prague', name: '史麥塔納博物館 (Smetana Museum)', currency: 'CZK', adult: 70, isic: 50, isicRule: '26', isicNote: 'ISIC ≤26歲 50 CZK', notes: '緊鄰查理大橋旁，週二休館。' },
+    { id: 'b7', city: 'CK', name: '席勒藝術中心 (Egon Schiele Art Centrum)', currency: 'CZK', adult: 220, isic: 140, isicRule: '26', isicNote: '學生優待約 140 CZK', notes: 'CK 小鎮冬季室內好去處，展示表現主義畫作。' },
+    { id: 'b8', city: 'Budapest', name: '菸草街猶太會堂 (Dohány Street Synagogue)', currency: 'HUF', adult: 14500, isic: 12000, isicRule: '26', isicNote: '持有效 ISIC 12,000 HUF', notes: '歐洲最大猶太會堂（週六公休），含導覽與紀念公園。' },
+    { id: 'b9', city: 'Budapest', name: '匈牙利國家美術館 (布達皇宮內)', currency: 'HUF', adult: 3800, isic: 1900, isicRule: '26', isicNote: '非歐盟 6–26 歲半價 1,900 HUF', notes: '週一休館；可登頂看布達皇宮圓頂視角。' },
+    { id: 'b10', city: 'Budapest', name: '恐怖之屋博物館 (House of Terror)', currency: 'HUF', adult: 4000, isic: 4000, isicRule: 'none', isicNote: '無非歐盟 ISIC 優惠 (優待僅限 EEA)', notes: '週一休館，僅限現場購票，紀錄匈牙利極權歷史。' },
+    { id: 'b11', city: 'Budapest', name: '匈牙利國家博物館 (National Museum)', currency: 'HUF', adult: 3500, isic: 3500, isicRule: 'none', isicNote: '無非歐盟 ISIC 優惠 (優待僅限 EEA)', notes: '週一休館，展示加冕斗篷與匈牙利建國史。' },
+    { id: 'b12', city: 'Budapest', name: '盧達溫泉 (Rudas Bath 假日全區)', currency: 'HUF', adult: 15000, isic: 15000, isicRule: 'none', isicNote: '無一般遊客 ISIC 優惠', notes: '頂樓有無邊際多瑙河景按摩池，週五六有夜間場。' }
+  ],
+  tickets: [
+    { id: 'tk1', category: '機票', title: '長榮航空 BR087 / BR088 (台北↔巴黎)', code: 'BY993V', date: '12/25 & 1/14', url: '', image: '', note: '電子機票編號：695-7510940995 (CHOU HSUEHHUNG)' },
+    { id: 'tk2', category: '機票', title: '法國泛航 TO4390 (巴黎 ORY → 布拉格 PRG)', code: 'DI85SK', date: '1/1', url: '', image: '', note: '2位成人 (CHOU HSUEHHUNG / LAI HSIN YUN)，奧利第3航廈出發。' },
+    { id: 'tk3', category: '住宿確認單', title: '巴黎巴紐商務酒店 (1晚)', code: '5497.237.807', date: '12/31–1/1', url: '', image: '', note: 'PIN 碼：5557｜204 Av. Aristide Briand, Bagneux｜11:00前退房' },
+    { id: 'tk4', category: '住宿確認單', title: '布拉格 Opatov 公寓 (5晚)', code: '5995.583.596', date: '1/1–1/6', url: '', image: '', note: 'PIN 碼：0306｜4 Bachova, Prague 11｜15:30入住 / 11:00退房' },
+    { id: 'tk5', category: '住宿確認單', title: '布達佩斯 New Flower Garden (4晚)', code: '6129.198.508', date: '1/7–1/11', url: '', image: '', note: 'PIN 碼：9154｜33 Pannónia utca｜16:00入住 / 11:00退房' }
+  ],
+  memos: [
+    { id: 'm1', title: '布拉格 & 布達佩斯必吃美食清單', body: '布拉格：煙囪捲 Trdelník、捷克烤豬腳、皮爾森生啤、Café Louvre 百年咖啡廳。\n布達佩斯：匈牙利牛肉湯 Gulyás、煙囪捲、中央市場蘭戈斯 Lángos、紐約咖啡館、貴腐酒 Tokaji。' },
+    { id: 'm2', title: '冬季穿搭與重要提醒', body: '一月中歐氣溫約 -3°C 至 4°C，日落約 16:15。\n務必攜帶：ISIC 實體卡、護照影本、泳衣＋拖鞋＋毛巾（泡溫泉用）、免海外手續費信用卡。' }
+  ],
+  checklist: [
+    { id: 'c1', text: '官網提前預約：匈牙利國會大廈導覽 (1/9)', done: false },
+    { id: 'c2', text: '官網提前預約：布拉格克萊門特學院圖書館 (1/3)', done: false },
+    { id: 'c3', text: '預訂 1/5 布拉格↔CK 小鎮 RegioJet 來回巴士', done: false },
+    { id: 'c4', text: '預訂 1/6 布拉格→布達佩斯 RegioJet 23:00 夜巴', done: false },
+    { id: 'c5', text: '預訂 1/11 布達佩斯→巴黎返程機票 (Wizz Air ORY)', done: false },
+    { id: 'c6', text: '手機下載 PID Lítačka (布拉格) 與 BudapestGO (布達佩斯) App', done: false },
+    { id: 'c7', text: '隨身攜帶 ISIC 國際學生證實體卡與護照', done: false },
+    { id: 'c8', text: '打包泡溫泉用品（泳衣、拖鞋、快乾毛巾）', done: false }
+  ],
+  memories: [
+    {
+      id: 'mem_sample_1',
+      date: '1/1 · 布拉格',
+      tag: '旅伴日常',
+      title: '抵達布拉格的第一晚！',
+      body: '剛出發的旅遊回憶牆範例：之後每天拍到的風景、吃到的美食都可以點右上角「新增回憶」放進來（這張範例可以直接編輯或刪除）。',
+      photos: []
+    }
+  ]
+};
+
+let canUseStorage = (function () {
+  try {
+    const k = '__test_ls__';
+    localStorage.setItem(k, '1');
+    localStorage.removeItem(k);
+    return true;
+  } catch (e) {
+    return false;
+  }
+})();
+
+const IDB_NAME = 'trip_planner_2027_db';
+const IDB_STORE = 'app_store';
+let idbDb = null;
+let canUseIDB = false;
+
+function openIDB() {
+  return new Promise(resolve => {
+    try {
+      if (!window.indexedDB) { resolve(null); return; }
+      const req = indexedDB.open(IDB_NAME, 1);
+      req.onupgradeneeded = e => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE);
+      };
+      req.onsuccess = e => { idbDb = e.target.result; canUseIDB = true; resolve(idbDb); };
+      req.onerror = () => resolve(null);
+    } catch (e) { resolve(null); }
+  });
+}
+
+function idbGet(key) {
+  return new Promise(resolve => {
+    if (!idbDb) { resolve(null); return; }
+    try {
+      const tx = idbDb.transaction(IDB_STORE, 'readonly');
+      const req = tx.objectStore(IDB_STORE).get(key);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => resolve(null);
+    } catch (e) { resolve(null); }
+  });
+}
+
+function idbSet(key, val) {
+  return new Promise(resolve => {
+    if (!idbDb) { resolve(false); return; }
+    try {
+      const tx = idbDb.transaction(IDB_STORE, 'readwrite');
+      tx.objectStore(IDB_STORE).put(val, key);
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => resolve(false);
+    } catch (e) { resolve(false); }
+  });
+}
+
+let state = loadState();
+let currentTab = 'itinerary';
+let activeDayId = null;
+let pendingTicketImage = '';
+let pendingMemoryPhotos = [];
+
+function loadState() {
+  if (!canUseStorage) return JSON.parse(JSON.stringify(DEFAULT_DATA));
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return Object.assign(JSON.parse(JSON.stringify(DEFAULT_DATA)), parsed);
+    }
+  } catch (e) {}
+  return JSON.parse(JSON.stringify(DEFAULT_DATA));
+}
+
+function saveState() {
+  if (canUseIDB) idbSet(STORAGE_KEY, state);
+  if (canUseStorage) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      if (!canUseIDB) showToast('儲存空間已滿，建議減少附圖或先匯出備份');
+    }
+  }
+}
+
+function updateStorageBadge() {
+  const el = document.getElementById('storageBadge');
+  if (!el) return;
+  if (canUseIDB) {
+    el.className = 'text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200';
+    el.textContent = '已啟用大容量自動存檔 (IndexedDB)';
+  } else if (canUseStorage) {
+    el.className = 'text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200';
+    el.textContent = '已啟用瀏覽器自動存檔';
+  } else {
+    el.className = 'text-[11px] font-semibold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200';
+    el.textContent = '內嵌環境無法自動存檔，離開前請按「下載新版網頁」或「匯出JSON」';
+  }
+}
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => el.classList.add('hidden'), 2600);
+}
+
+function escapeHtml(str) {
+  return String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+}
+
+function isEligible(profile, rule) {
+  if (rule === 'none') return false;
+  if (rule === '24') return profile === 'isic24';
+  if (rule === '26' || rule === 'student') return profile === 'isic24' || profile === 'isic26';
+  return false;
+}
+
+function calcItemCost(item) {
+  const pA = isEligible(state.profileA, item.isicRule) ? Number(item.isic) : Number(item.adult);
+  const pB = isEligible(state.profileB, item.isicRule) ? Number(item.isic) : Number(item.adult);
+  const pairLocal = pA + pB;
+  const fullLocal = Number(item.adult) * 2;
+  const rate = RATES[item.currency] || 1;
+  return { pairLocal, pairEur: pairLocal * rate, savedEur: Math.max(0, (fullLocal - pairLocal) * rate) };
+}
+
+function fmtLocal(val, curr) {
+  if (curr === 'EUR') return '€' + val.toFixed(val % 1 === 0 ? 0 : 2);
+  return Math.round(val).toLocaleString('zh-TW') + ' ' + curr;
+}
+
+function fmtEurTwd(eur) {
+  const twd = Math.round(eur * RATES.TWD).toLocaleString('zh-TW');
+  return `€${eur.toFixed(1)} <span class="text-[11px] font-normal opacity-80">(NT$${twd})</span>`;
+}
+
+function applyHeaderCollapseUI() {
+  const panel = document.getElementById('headerCollapsible');
+  const mini = document.getElementById('miniGrandTotal');
+  const txt = document.getElementById('toggleHeaderText');
+  const chev = document.getElementById('toggleHeaderChevron');
+  const btn = document.getElementById('btnToggleHeader');
+  const collapsed = Boolean(state.headerCollapsed);
+
+  panel.classList.toggle('hidden', collapsed);
+  mini.classList.toggle('hidden', !collapsed);
+  txt.textContent = collapsed ? '展開總覽' : '收合總覽';
+  chev.classList.toggle('rotate-180', collapsed);
+  btn.setAttribute('aria-expanded', String(!collapsed));
+}
+
+function renderSummary() {
+  let intercityEur = 0, localTransitEur = 0, attrEur = 0, savedEur = 0;
+
+  state.transit.forEach(t => {
+    if (!t.included) return;
+    const c = calcItemCost(t);
+    if (t.cat === 'intercity') intercityEur += c.pairEur;
+    else localTransitEur += c.pairEur;
+    savedEur += c.savedEur;
+  });
+
+  state.days.forEach(d => {
+    d.items.forEach(it => {
+      if (!it.included) return;
+      const c = calcItemCost(it);
+      attrEur += c.pairEur;
+      savedEur += c.savedEur;
+    });
+  });
+
+  const totalEur = intercityEur + localTransitEur + attrEur;
+  document.getElementById('sumIntercity').innerHTML = fmtEurTwd(intercityEur);
+  document.getElementById('sumLocalTransit').innerHTML = fmtEurTwd(localTransitEur);
+  document.getElementById('sumAttractions').innerHTML = fmtEurTwd(attrEur);
+  document.getElementById('sumSaved').innerHTML = fmtEurTwd(savedEur);
+  document.getElementById('sumGrandTotal').innerHTML = fmtEurTwd(totalEur);
+  document.getElementById('miniGrandTotal').textContent = `總預算 €${totalEur.toFixed(1)} (NT$${Math.round(totalEur * RATES.TWD).toLocaleString('zh-TW')})`;
+
+  // Update all-in food estimator
+  const foodPerDay = Number(state.foodPerDay || 80);
+  const dayCount = Math.max(1, state.days.length);
+  const foodTotal = foodPerDay * dayCount;
+  const hotelTotal = (state.accommodations || []).reduce((acc, a) => acc + (Number(a.eur) || 0), 0);
+  const grandAllIn = totalEur + foodTotal + hotelTotal;
+  document.getElementById('foodPerDaySlider').value = foodPerDay;
+  document.getElementById('foodPerDayVal').textContent = `€${foodPerDay}/天`;
+  document.getElementById('foodTotalLabel').textContent = `${dayCount}天餐飲 €${foodTotal}`;
+  document.getElementById('allInEstimate').innerHTML = `
+    <span>交通+門票 <strong>€${totalEur.toFixed(0)}</strong> + 住宿 <strong>€${hotelTotal.toFixed(0)}</strong> + 餐飲 <strong>€${foodTotal}</strong></span>
+    <span class="font-bold text-sky-900">雙人落地總計 ≈ €${grandAllIn.toFixed(0)} (每人 NT$${Math.round((grandAllIn / 2) * RATES.TWD).toLocaleString('zh-TW')})</span>
+  `;
+}
+
+function renderDays() {
+  const container = document.getElementById('daysContainer');
+  container.innerHTML = state.days.map(day => {
+    let dayEur = 0;
+    const isCollapsed = Boolean(state.collapsedDays && state.collapsedDays[day.id]);
+    const rows = day.items.map((item, idx) => {
+      const c = calcItemCost(item);
+      if (item.included) dayEur += c.pairEur;
+      const hasDiscount = c.savedEur > 0.01;
+      return `
+        <div class="p-3.5 sm:px-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${item.included ? 'bg-white' : 'bg-slate-50 opacity-60'}">
+          <div class="flex items-start gap-3 flex-1 min-w-0">
+            <input type="checkbox" data-action="toggle-item" data-day="${day.id}" data-id="${item.id}" ${item.included ? 'checked' : ''} class="mt-1 h-4 w-4 rounded border-slate-300 text-sky-700 cursor-pointer no-print" title="納入預算計算">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-xs font-mono font-semibold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">${escapeHtml(item.time)}</span>
+                <span class="font-semibold text-sm text-slate-900">${escapeHtml(item.name)}</span>
+                ${item.isicNote ? `<span class="text-[11px] px-2 py-0.5 rounded-full ${hasDiscount ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold' : 'bg-slate-100 text-slate-600'}">${escapeHtml(item.isicNote)}</span>` : ''}
+              </div>
+              ${item.notes ? `<p class="text-xs text-slate-500 mt-1 leading-relaxed">${escapeHtml(item.notes)}</p>` : ''}
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between sm:justify-end gap-3 pl-7 sm:pl-0 shrink-0">
+            <div class="text-right tabular-nums">
+              <div class="text-sm font-bold text-slate-900">${c.pairLocal === 0 ? '免費 / 已含' : fmtLocal(c.pairLocal, item.currency)}</div>
+              ${c.pairLocal > 0 ? `<div class="text-[11px] text-slate-400">≈ €${c.pairEur.toFixed(1)}</div>` : ''}
+            </div>
+            <div class="flex items-center gap-0.5 no-print">
+              <button type="button" data-action="move-up" data-day="${day.id}" data-idx="${idx}" class="p-1.5 rounded hover:bg-slate-100 text-slate-500" title="上移"><i data-lucide="chevron-up" class="w-4 h-4"></i></button>
+              <button type="button" data-action="move-down" data-day="${day.id}" data-idx="${idx}" class="p-1.5 rounded hover:bg-slate-100 text-slate-500" title="下移"><i data-lucide="chevron-down" class="w-4 h-4"></i></button>
+              <button type="button" data-action="edit-item" data-day="${day.id}" data-id="${item.id}" class="p-1.5 rounded hover:bg-sky-50 text-sky-700" title="編輯"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+              <button type="button" data-action="delete-item" data-day="${day.id}" data-id="${item.id}" class="p-1.5 rounded hover:bg-rose-50 text-rose-600" title="刪除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden print-break-avoid">
+        <div class="px-4 sm:px-5 py-3 bg-slate-50/80 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div class="flex items-start gap-2.5 min-w-0">
+            <button type="button" data-action="toggle-day" data-day="${day.id}" class="mt-0.5 p-1 rounded hover:bg-slate-200 text-slate-600 no-print" title="收合/展開這一天">
+              <svg class="w-4 h-4 transition-transform ${isCollapsed ? '-rotate-90' : ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="min-w-0 cursor-pointer group" data-action="open-day-detail" data-day="${day.id}" title="點擊進入當日詳細規劃與景點介紹">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-xs font-bold px-2 py-0.5 rounded bg-sky-800 text-white group-hover:bg-sky-700">${escapeHtml(day.date)}</span>
+                <span class="text-xs font-semibold text-sky-800">${escapeHtml(day.city)}</span>
+                <h3 class="text-sm sm:text-base font-bold text-slate-900 group-hover:text-sky-800 group-hover:underline">${escapeHtml(day.title)}</h3>
+              </div>
+              <div class="text-xs text-slate-500 mt-0.5">${escapeHtml(day.hotel)}</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
+            <span class="text-xs font-semibold text-slate-600 tabular-nums mr-1">當日: €${dayEur.toFixed(1)} (${day.items.length}項)</span>
+            <button type="button" data-action="edit-day" data-day="${day.id}" class="p-1.5 rounded-lg bg-white border border-slate-300 hover:bg-sky-50 text-sky-700 no-print" title="編輯這一天資訊">
+              <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+            </button>
+            <button type="button" data-action="delete-day" data-day="${day.id}" class="p-1.5 rounded-lg bg-white border border-slate-300 hover:bg-rose-50 text-rose-600 no-print" title="刪除這一天">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+            <button type="button" data-action="open-day-detail" data-day="${day.id}" class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-sky-50 border border-sky-200 hover:bg-sky-100 text-sky-800 no-print">
+              詳細規劃 <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </button>
+            <button type="button" data-action="add-item" data-day="${day.id}" class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 no-print">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> 新增
+            </button>
+          </div>
+        </div>
+        <div class="${isCollapsed ? 'hidden' : ''} divide-y divide-slate-100">${rows || '<div class="p-4 text-xs text-slate-400">尚無行程項目，點擊右上角「新增」或從備選景點加入。</div>'}</div>
+      </div>
+    `;
+  }).join('');
+  const showDetail = Boolean(activeDayId && state.days.some(d => d.id === activeDayId));
+  document.getElementById('daysListToolbar').classList.toggle('hidden', showDetail);
+  document.getElementById('daysContainer').classList.toggle('hidden', showDetail);
+  document.getElementById('dayDetailView').classList.toggle('hidden', !showDetail);
+  if (showDetail) renderDayDetail();
+  lucide.createIcons();
+}
+
+function getDayGuide(day) {
+  const def = DEFAULT_DAY_GUIDES[day.id] || {
+    route: '尚未填寫交通與動線攻略，可直接於此框輸入地鐵站、公車號碼或步行路線。',
+    highlights: '尚未填寫景點深度介紹與注意事項，可直接輸入開放時間、預約連結或拍照機位。',
+    food: '尚未填寫當日餐廳與咖啡廳口袋名單，可直接輸入想吃的料理或預約時間。'
+  };
+  return {
+    route: (day.guide && typeof day.guide.route === 'string') ? day.guide.route : def.route,
+    highlights: (day.guide && typeof day.guide.highlights === 'string') ? day.guide.highlights : def.highlights,
+    food: (day.guide && typeof day.guide.food === 'string') ? day.guide.food : def.food
+  };
+}
+
+function renderDayDetail() {
+  const idx = state.days.findIndex(d => d.id === activeDayId);
+  if (idx < 0) { activeDayId = null; renderDays(); return; }
+  const day = state.days[idx];
+  const prevDay = idx > 0 ? state.days[idx - 1] : null;
+  const nextDay = idx < state.days.length - 1 ? state.days[idx + 1] : null;
+  const guide = getDayGuide(day);
+
+  let dayEur = 0;
+  let daySavedEur = 0;
+  const itemsHtml = day.items.map((item, iIdx) => {
+    const c = calcItemCost(item);
+    if (item.included) { dayEur += c.pairEur; daySavedEur += c.savedEur; }
+    const hasDiscount = c.savedEur > 0.01;
+    return `
+      <div class="p-4 flex flex-col sm:flex-row sm:items-start justify-between gap-3 ${item.included ? 'bg-white' : 'bg-slate-50 opacity-60'}">
+        <div class="flex items-start gap-3 flex-1 min-w-0">
+          <input type="checkbox" data-action="detail-toggle-item" data-id="${item.id}" ${item.included ? 'checked' : ''} class="mt-1 h-4 w-4 rounded border-slate-300 text-sky-700 cursor-pointer no-print">
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-sky-100 text-sky-900">${escapeHtml(item.time)}</span>
+              <span class="font-bold text-sm sm:text-base text-slate-900">${escapeHtml(item.name)}</span>
+              ${item.isicNote ? `<span class="text-[11px] px-2 py-0.5 rounded-full ${hasDiscount ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold' : 'bg-slate-100 text-slate-600'}">${escapeHtml(item.isicNote)}</span>` : ''}
+            </div>
+            ${item.notes ? `<p class="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed">${escapeHtml(item.notes)}</p>` : ''}
+          </div>
+        </div>
+        <div class="flex items-center justify-between sm:justify-end gap-3 pl-7 sm:pl-0 shrink-0">
+          <div class="text-right tabular-nums">
+            <div class="text-sm font-bold text-slate-900">${c.pairLocal === 0 ? '免費 / 已含' : fmtLocal(c.pairLocal, item.currency)}</div>
+            ${c.pairLocal > 0 ? `<div class="text-[11px] text-slate-500">≈ €${c.pairEur.toFixed(1)} (NT$${Math.round(c.pairEur * RATES.TWD).toLocaleString('zh-TW')})</div>` : ''}
+          </div>
+          <div class="flex items-center gap-0.5 no-print">
+            <button type="button" data-action="detail-move-up" data-idx="${iIdx}" class="p-1.5 rounded hover:bg-slate-100 text-slate-500" title="上移"><i data-lucide="chevron-up" class="w-4 h-4"></i></button>
+            <button type="button" data-action="detail-move-down" data-idx="${iIdx}" class="p-1.5 rounded hover:bg-slate-100 text-slate-500" title="下移"><i data-lucide="chevron-down" class="w-4 h-4"></i></button>
+            <button type="button" data-action="detail-edit-item" data-id="${item.id}" class="p-1.5 rounded hover:bg-sky-50 text-sky-700" title="編輯"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+            <button type="button" data-action="detail-delete-item" data-id="${item.id}" class="p-1.5 rounded hover:bg-rose-50 text-rose-600" title="刪除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('dayDetailView').innerHTML = `
+    <!-- Top Nav Bar -->
+    <div class="flex flex-wrap items-center justify-between gap-2 no-print">
+      <button type="button" data-action="back-to-list" class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold px-3 py-2 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-800">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i> 返回全部日期列表
+      </button>
+      <div class="flex items-center gap-2">
+        ${prevDay ? `<button type="button" data-action="switch-day" data-day="${prevDay.id}" class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-2 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-700"><i data-lucide="chevron-left" class="w-3.5 h-3.5"></i> ${escapeHtml(prevDay.date)}</button>` : ''}
+        ${nextDay ? `<button type="button" data-action="switch-day" data-day="${nextDay.id}" class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-2 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-700">${escapeHtml(nextDay.date)} <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></button>` : ''}
+      </div>
+    </div>
+
+    <!-- Day Hero Banner -->
+    <div class="bg-gradient-to-r from-sky-900 to-slate-800 text-white rounded-2xl p-5 sm:p-6 shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-white/15 border border-white/25">${escapeHtml(day.date)}</span>
+            <span class="text-xs font-semibold text-sky-200">${escapeHtml(day.city)}</span>
+          </div>
+          <h2 class="text-xl sm:text-2xl font-bold mt-2">${escapeHtml(day.title)}</h2>
+          <p class="text-xs sm:text-sm text-sky-100/90 mt-1.5 flex items-center gap-1.5">
+            <i data-lucide="bed-double" class="w-4 h-4 shrink-0"></i> ${escapeHtml(day.hotel || '尚未填寫住宿與交通備註')}
+          </p>
+        </div>
+        <div class="flex flex-col sm:items-end gap-2 shrink-0">
+          <div class="bg-white/10 border border-white/20 rounded-xl px-3.5 py-2 text-right tabular-nums">
+            <div class="text-[11px] text-sky-200">當日雙人門票/活動小計</div>
+            <div class="text-lg font-bold">€${dayEur.toFixed(1)} <span class="text-xs font-normal text-sky-200">(NT$${Math.round(dayEur * RATES.TWD).toLocaleString('zh-TW')})</span></div>
+            ${daySavedEur > 0.01 ? `<div class="text-[11px] text-emerald-300 font-semibold">ISIC 已省 €${daySavedEur.toFixed(1)}</div>` : ''}
+          </div>
+          <button type="button" data-action="detail-edit-day" class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 border border-white/25 text-white no-print">
+            <i data-lucide="pencil" class="w-3.5 h-3.5"></i> 編輯日期與標題
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detailed Editable Guide Cards (Route / Highlights / Food) -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex flex-col">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5"><i data-lucide="map-pin" class="w-4 h-4 text-sky-700"></i> 交通動線與接駁攻略</h3>
+          <span class="text-[11px] text-slate-400">直接輸入自動存檔</span>
+        </div>
+        <textarea data-guide-field="route" rows="6" class="w-full flex-1 text-xs sm:text-sm text-slate-700 leading-relaxed bg-slate-50/70 border border-slate-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:bg-white">${escapeHtml(guide.route)}</textarea>
+      </div>
+
+      <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex flex-col">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5"><i data-lucide="sparkles" class="w-4 h-4 text-amber-600"></i> 景點深度介紹與貼士</h3>
+          <span class="text-[11px] text-slate-400">直接輸入自動存檔</span>
+        </div>
+        <textarea data-guide-field="highlights" rows="6" class="w-full flex-1 text-xs sm:text-sm text-slate-700 leading-relaxed bg-slate-50/70 border border-slate-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white">${escapeHtml(guide.highlights)}</textarea>
+      </div>
+
+      <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex flex-col">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5"><i data-lucide="utensils" class="w-4 h-4 text-emerald-700"></i> 餐飲與咖啡廳推薦</h3>
+          <span class="text-[11px] text-slate-400">直接輸入自動存檔</span>
+        </div>
+        <textarea data-guide-field="food" rows="6" class="w-full flex-1 text-xs sm:text-sm text-slate-700 leading-relaxed bg-slate-50/70 border border-slate-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white">${escapeHtml(guide.food)}</textarea>
+      </div>
+    </div>
+
+    <!-- Day Schedule Timeline -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-2">
+        <h3 class="text-sm sm:text-base font-bold text-slate-900">當日時段與門票預算明細（共 ${day.items.length} 項）</h3>
+        <button type="button" data-action="detail-add-item" class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-sky-700 hover:bg-sky-800 text-white no-print">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i> 新增當日行程
+        </button>
+      </div>
+      <div class="divide-y divide-slate-100">${itemsHtml || '<div class="p-6 text-center text-xs text-slate-400">這一天還沒有排入行程項目，點擊右上角「新增當日行程」或到「其他備選景點」加入。</div>'}</div>
+    </div>
+  `;
+}
+
+function renderTransit() {
+  const tbody = document.getElementById('transitTableBody');
+  tbody.innerHTML = state.transit.map(t => {
+    const c = calcItemCost(t);
+    return `
+      <tr class="${t.included ? '' : 'opacity-50 bg-slate-50'}">
+        <td class="py-3 px-4"><input type="checkbox" data-action="toggle-transit" data-id="${t.id}" ${t.included ? 'checked' : ''} class="h-4 w-4 rounded border-slate-300 text-sky-700 cursor-pointer"></td>
+        <td class="py-3 px-3"><span class="text-[11px] font-semibold px-2 py-0.5 rounded-full ${t.cat === 'intercity' ? 'bg-indigo-50 text-indigo-700' : 'bg-teal-50 text-teal-700'}">${t.cat === 'intercity' ? '跨城/機場' : '市區通票'}</span></td>
+        <td class="py-3 px-3 font-semibold text-slate-900">${escapeHtml(t.label)}</td>
+        <td class="py-3 px-3 text-xs text-slate-600">${escapeHtml(t.method)}</td>
+        <td class="py-3 px-3 text-xs text-slate-500">${escapeHtml(t.isicNote)}</td>
+        <td class="py-3 px-3 text-right font-bold tabular-nums text-slate-900">
+          ${fmtLocal(c.pairLocal, t.currency)}
+          <div class="text-[11px] font-normal text-slate-400">≈ €${c.pairEur.toFixed(1)}</div>
+        </td>
+        <td class="py-3 px-4 text-right whitespace-nowrap">
+          <button type="button" data-action="edit-transit" data-id="${t.id}" class="p-1.5 rounded hover:bg-sky-50 text-sky-700" title="編輯"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+          <button type="button" data-action="delete-transit" data-id="${t.id}" class="p-1.5 rounded hover:bg-rose-50 text-rose-600" title="刪除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+  lucide.createIcons();
+}
+
+function renderBonus() {
+  const cityF = document.getElementById('bonusCityFilter').value;
+  const isicF = document.getElementById('bonusIsicFilter').value;
+  const list = state.bonus.filter(b => {
+    const hasIsic = b.isicRule !== 'none';
+    if (cityF !== 'all' && b.city !== cityF) return false;
+    if (isicF === 'yes' && !hasIsic) return false;
+    if (isicF === 'no' && hasIsic) return false;
+    return true;
+  });
+
+  const dayOpts = state.days.map(d => `<option value="${d.id}">${escapeHtml(d.date)} · ${escapeHtml(d.city)}</option>`).join('');
+  const cityLabels = { Prague: '布拉格', CK: '庫倫洛夫 CK', Budapest: '布達佩斯', Paris: '巴黎' };
+
+  document.getElementById('bonusGrid').innerHTML = list.map(b => {
+    const c = calcItemCost(b);
+    const hasIsic = b.isicRule !== 'none';
+    return `
+      <div class="rounded-xl border border-slate-200 p-4 flex flex-col justify-between bg-slate-50/50">
+        <div>
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-700">${cityLabels[b.city] || b.city}</span>
+            <div class="flex items-center gap-1">
+              <button type="button" data-action="edit-bonus" data-bonus="${b.id}" class="p-1 rounded hover:bg-sky-100 text-sky-700" title="編輯景點"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+              <button type="button" data-action="delete-bonus" data-bonus="${b.id}" class="p-1 rounded hover:bg-rose-100 text-rose-600" title="刪除景點"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+            </div>
+          </div>
+          <div class="mt-2">
+            <span class="inline-block text-[11px] font-semibold px-2 py-0.5 rounded-full ${hasIsic ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}">${escapeHtml(b.isicNote || (hasIsic ? '有 ISIC 優惠' : '無非歐盟 ISIC 優惠'))}</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 mt-2">${escapeHtml(b.name)}</h3>
+          <p class="text-xs text-slate-600 mt-1 leading-relaxed">${escapeHtml(b.notes)}</p>
+          <div class="mt-3 text-xs text-slate-700 tabular-nums">
+            成人: <strong>${fmtLocal(b.adult, b.currency)}</strong> · 目前雙人試算: <strong class="text-sky-800">${fmtLocal(c.pairLocal, b.currency)}</strong>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-200 flex items-center gap-2">
+          <select id="sel_${b.id}" class="flex-1 text-xs border border-slate-300 rounded-lg px-2 py-1.5 bg-white">${dayOpts}</select>
+          <button type="button" data-action="add-bonus-to-day" data-bonus="${b.id}" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-sky-700 hover:bg-sky-800 text-white whitespace-nowrap">＋ 加入行程</button>
+        </div>
+      </div>
+    `;
+  }).join('') || '<div class="col-span-full text-center py-8 text-xs text-slate-400">沒有符合條件的備選景點，點擊右上角「新增備選景點」自行建立。</div>';
+  lucide.createIcons();
+}
+
+function renderVault() {
+  // Tickets
+  document.getElementById('ticketsGrid').innerHTML = state.tickets.map(tk => `
+    <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 flex flex-col justify-between gap-2.5">
+      <div>
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-sky-100 text-sky-800">${escapeHtml(tk.category)}</span>
+          <div class="flex items-center gap-1">
+            <span class="text-[11px] text-slate-500">${escapeHtml(tk.date)}</span>
+            <button type="button" data-action="edit-ticket" data-id="${tk.id}" class="p-1 rounded hover:bg-sky-100 text-sky-700" title="編輯"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+            <button type="button" data-action="delete-ticket" data-id="${tk.id}" class="p-1 rounded hover:bg-rose-100 text-rose-600" title="刪除"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+          </div>
+        </div>
+        <h3 class="text-sm font-bold text-slate-900 mt-2">${escapeHtml(tk.title)}</h3>
+        ${tk.code ? `
+          <div class="mt-2 flex items-center justify-between bg-white border border-slate-200 rounded-lg px-2.5 py-1.5">
+            <span class="font-mono text-xs font-bold text-slate-800 truncate">${escapeHtml(tk.code)}</span>
+            <button type="button" data-action="copy-code" data-code="${escapeHtml(tk.code)}" class="text-[11px] font-semibold text-sky-700 hover:underline shrink-0 ml-2">複製</button>
+          </div>` : ''}
+        ${tk.note ? `<p class="text-xs text-slate-600 mt-2 whitespace-pre-line leading-relaxed">${escapeHtml(tk.note)}</p>` : ''}
+        ${tk.image ? `
+          <button type="button" data-action="view-ticket-img" data-id="${tk.id}" class="mt-2.5 block w-full text-left group">
+            <img src="${tk.image}" alt="門票截圖" class="h-28 w-full object-cover rounded-lg border border-slate-200 group-hover:opacity-90">
+            <span class="text-[11px] text-sky-700 font-medium mt-1 inline-block">點擊放大檢視憑證圖片</span>
+          </button>` : ''}
+      </div>
+      ${tk.url ? `<a href="${escapeHtml(tk.url)}" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold text-sky-700 hover:underline inline-flex items-center gap-1 pt-2 border-t border-slate-200">開啟電子票連結 <i data-lucide="external-link" class="w-3 h-3"></i></a>` : ''}
+    </div>
+  `).join('') || '<div class="col-span-full text-center py-6 text-xs text-slate-400">尚未新增門票憑證，點擊右上角「新增門票 / 憑證」。</div>';
+
+  // Memos
+  document.getElementById('memosContainer').innerHTML = state.memos.map(m => `
+    <div class="rounded-xl border border-amber-200/80 bg-amber-50/40 p-3.5">
+      <div class="flex items-center justify-between gap-2 mb-1.5">
+        <input type="text" data-action="memo-title" data-id="${m.id}" value="${escapeHtml(m.title)}" class="flex-1 bg-transparent font-bold text-sm text-slate-900 focus:outline-none focus:bg-white focus:px-2 rounded">
+        <button type="button" data-action="delete-memo" data-id="${m.id}" class="p-1 rounded hover:bg-rose-100 text-rose-600" title="刪除筆記"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+      </div>
+      <textarea data-action="memo-body" data-id="${m.id}" rows="3" class="w-full bg-white/80 border border-amber-200/70 rounded-lg px-2.5 py-2 text-xs text-slate-700 leading-relaxed focus:outline-none focus:ring-2 focus:ring-amber-400">${escapeHtml(m.body)}</textarea>
+    </div>
+  `).join('');
+
+  // Checklist
+  const doneCount = state.checklist.filter(c => c.done).length;
+  document.getElementById('checklistProgress').textContent = `${doneCount} / ${state.checklist.length} 完成`;
+  document.getElementById('checklistContainer').innerHTML = state.checklist.map(c => `
+    <div class="flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg border border-slate-200/80 ${c.done ? 'bg-slate-50' : 'bg-white'}">
+      <label class="flex items-center gap-2.5 flex-1 cursor-pointer min-w-0">
+        <input type="checkbox" data-action="toggle-check" data-id="${c.id}" ${c.done ? 'checked' : ''} class="h-4 w-4 rounded border-slate-300 text-emerald-600 cursor-pointer shrink-0">
+        <span class="text-xs ${c.done ? 'line-through text-slate-400' : 'text-slate-800'} break-words">${escapeHtml(c.text)}</span>
+      </label>
+      <button type="button" data-action="delete-check" data-id="${c.id}" class="p-1 text-slate-400 hover:text-rose-600 shrink-0"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+    </div>
+  `).join('');
+
+  lucide.createIcons();
+}
+
+function renderAccommodations() {
+  const list = state.accommodations || [];
+  const totalEur = list.reduce((acc, a) => acc + (Number(a.eur) || 0), 0);
+  const totalTwd = Math.round(totalEur * RATES.TWD).toLocaleString('zh-TW');
+  document.getElementById('accSummaryTitle').textContent = `住宿明細（共 ${list.length} 筆 · 合計 €${totalEur.toFixed(2)} / 約 NT$${totalTwd}）`;
+
+  document.getElementById('accGrid').innerHTML = list.map(a => `
+    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between gap-2">
+      <div>
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <span class="inline-block text-[11px] font-bold px-2 py-0.5 rounded bg-sky-100 text-sky-800">${escapeHtml(a.dates)}</span>
+            <div class="font-bold text-sm text-slate-900 mt-1.5">${escapeHtml(a.name)}</div>
+          </div>
+          <div class="flex items-center gap-0.5 shrink-0">
+            <button type="button" data-action="edit-acc" data-id="${a.id}" class="p-1 rounded hover:bg-sky-100 text-sky-700" title="編輯住宿"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+            <button type="button" data-action="delete-acc" data-id="${a.id}" class="p-1 rounded hover:bg-rose-100 text-rose-600" title="刪除住宿"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+          </div>
+        </div>
+        ${a.address ? `<div class="text-slate-600 mt-1">${escapeHtml(a.address)}</div>` : ''}
+        <div class="text-slate-800 font-semibold mt-1.5 tabular-nums">€${Number(a.eur).toFixed(2)} (約 NT$${Math.round(Number(a.eur) * RATES.TWD).toLocaleString('zh-TW')})</div>
+        ${a.times ? `<div class="text-slate-500 mt-0.5">${escapeHtml(a.times)}</div>` : ''}
+      </div>
+      ${(a.code || a.pin) ? `<div class="pt-2 border-t border-slate-200 text-[11px] text-slate-500 font-mono">${a.code ? '確認碼 ' + escapeHtml(a.code) : ''}${a.code && a.pin ? ' · ' : ''}${escapeHtml(a.pin)}</div>` : ''}
+    </div>
+  `).join('') || '<div class="col-span-full text-center py-6 text-slate-400">尚未新增住宿，點擊右上角「新增住宿」。</div>';
+  lucide.createIcons();
+}
+
+function openAccModal(id) {
+  if (id) {
+    const a = state.accommodations.find(x => x.id === id);
+    document.getElementById('accModalTitle').textContent = '編輯住宿明細';
+    document.getElementById('accId').value = a.id;
+    document.getElementById('accName').value = a.name || '';
+    document.getElementById('accDates').value = a.dates || '';
+    document.getElementById('accAddress').value = a.address || '';
+    document.getElementById('accEur').value = a.eur || 0;
+    document.getElementById('accTimes').value = a.times || '';
+    document.getElementById('accCode').value = a.code || '';
+    document.getElementById('accPin').value = a.pin || '';
+  } else {
+    document.getElementById('accModalTitle').textContent = '新增住宿明細';
+    document.getElementById('accId').value = '';
+    document.getElementById('accName').value = '';
+    document.getElementById('accDates').value = '';
+    document.getElementById('accAddress').value = '';
+    document.getElementById('accEur').value = 0;
+    document.getElementById('accTimes').value = '';
+    document.getElementById('accCode').value = '';
+    document.getElementById('accPin').value = '';
+  }
+  const m = document.getElementById('accModal');
+  m.classList.remove('hidden');
+  m.classList.add('flex');
+}
+
+function closeAccModal() {
+  const m = document.getElementById('accModal');
+  m.classList.add('hidden');
+  m.classList.remove('flex');
+}
+
+function renderAll() {
+  updateStorageBadge();
+  document.getElementById('profileA').value = state.profileA;
+  document.getElementById('profileB').value = state.profileB;
+  applyHeaderCollapseUI();
+  renderSummary();
+  renderDays();
+  renderTransit();
+  renderAccommodations();
+  renderBonus();
+  renderVault();
+  renderMemories();
+}
+
+function openModal(mode, dayId, itemId) {
+  document.getElementById('mMode').value = mode;
+  document.getElementById('mDayId').value = dayId || '';
+  document.getElementById('mItemId').value = itemId || '';
+
+  const isBonus = mode === 'add-bonus' || mode === 'edit-bonus';
+  const isTransit = mode === 'add-transit' || mode === 'edit-transit';
+  document.getElementById('mTime').classList.toggle('hidden', isBonus);
+  document.getElementById('mCitySelect').classList.toggle('hidden', !isBonus);
+  document.getElementById('mTimeLabel').textContent = isBonus ? '城市' : (isTransit ? '類型 (intercity/local)' : '時段');
+
+  if (mode === 'add-item') {
+    document.getElementById('modalTitle').textContent = '新增當日行程項目';
+    document.getElementById('mTime').value = '14:00';
+    document.getElementById('mName').value = '';
+    document.getElementById('mCurrency').value = 'CZK';
+    document.getElementById('mAdult').value = 0;
+    document.getElementById('mIsic').value = 0;
+    document.getElementById('mIsicRule').value = 'none';
+    document.getElementById('mIsicNote').value = '';
+    document.getElementById('mNotes').value = '';
+  } else if (mode === 'edit-item') {
+    const day = state.days.find(d => d.id === dayId);
+    const it = day.items.find(i => i.id === itemId);
+    document.getElementById('modalTitle').textContent = '編輯行程項目';
+    document.getElementById('mTime').value = it.time;
+    document.getElementById('mName').value = it.name;
+    document.getElementById('mCurrency').value = it.currency;
+    document.getElementById('mAdult').value = it.adult;
+    document.getElementById('mIsic').value = it.isic;
+    document.getElementById('mIsicRule').value = it.isicRule;
+    document.getElementById('mIsicNote').value = it.isicNote;
+    document.getElementById('mNotes').value = it.notes;
+  } else if (mode === 'add-transit') {
+    document.getElementById('modalTitle').textContent = '新增交通項目';
+    document.getElementById('mTime').value = 'intercity';
+    document.getElementById('mName').value = '';
+    document.getElementById('mCurrency').value = 'EUR';
+    document.getElementById('mAdult').value = 0;
+    document.getElementById('mIsic').value = 0;
+    document.getElementById('mIsicRule').value = 'none';
+    document.getElementById('mIsicNote').value = '';
+    document.getElementById('mNotes').value = '';
+  } else if (mode === 'edit-transit') {
+    const t = state.transit.find(x => x.id === itemId);
+    document.getElementById('modalTitle').textContent = '編輯交通項目';
+    document.getElementById('mTime').value = t.cat;
+    document.getElementById('mName').value = t.label;
+    document.getElementById('mCurrency').value = t.currency;
+    document.getElementById('mAdult').value = t.adult;
+    document.getElementById('mIsic').value = t.isic;
+    document.getElementById('mIsicRule').value = t.isicRule;
+    document.getElementById('mIsicNote').value = t.isicNote;
+    document.getElementById('mNotes').value = t.method;
+  } else if (mode === 'add-bonus') {
+    document.getElementById('modalTitle').textContent = '新增備選景點';
+    document.getElementById('mCitySelect').value = 'Prague';
+    document.getElementById('mName').value = '';
+    document.getElementById('mCurrency').value = 'CZK';
+    document.getElementById('mAdult').value = 0;
+    document.getElementById('mIsic').value = 0;
+    document.getElementById('mIsicRule').value = '26';
+    document.getElementById('mIsicNote').value = '';
+    document.getElementById('mNotes').value = '';
+  } else if (mode === 'edit-bonus') {
+    const b = state.bonus.find(x => x.id === itemId);
+    document.getElementById('modalTitle').textContent = '編輯備選景點';
+    document.getElementById('mCitySelect').value = b.city;
+    document.getElementById('mName').value = b.name;
+    document.getElementById('mCurrency').value = b.currency;
+    document.getElementById('mAdult').value = b.adult;
+    document.getElementById('mIsic').value = b.isic;
+    document.getElementById('mIsicRule').value = b.isicRule;
+    document.getElementById('mIsicNote').value = b.isicNote;
+    document.getElementById('mNotes').value = b.notes;
+  }
+
+  const modal = document.getElementById('editModal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function closeModal() {
+  const modal = document.getElementById('editModal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
+function openTicketModal(id) {
+  pendingTicketImage = '';
+  document.getElementById('tkFile').value = '';
+  if (id) {
+    const tk = state.tickets.find(x => x.id === id);
+    document.getElementById('ticketModalTitle').textContent = '編輯門票 / 憑證';
+    document.getElementById('tkId').value = tk.id;
+    document.getElementById('tkCategory').value = tk.category;
+    document.getElementById('tkTitle').value = tk.title;
+    document.getElementById('tkCode').value = tk.code || '';
+    document.getElementById('tkDate').value = tk.date || '';
+    document.getElementById('tkUrl').value = tk.url || '';
+    document.getElementById('tkNote').value = tk.note || '';
+    pendingTicketImage = tk.image || '';
+  } else {
+    document.getElementById('ticketModalTitle').textContent = '新增門票 / 憑證';
+    document.getElementById('tkId').value = '';
+    document.getElementById('tkCategory').value = '景點門票';
+    document.getElementById('tkTitle').value = '';
+    document.getElementById('tkCode').value = '';
+    document.getElementById('tkDate').value = '';
+    document.getElementById('tkUrl').value = '';
+    document.getElementById('tkNote').value = '';
+  }
+  updateTicketPreview();
+  const m = document.getElementById('ticketModal');
+  m.classList.remove('hidden');
+  m.classList.add('flex');
+}
+
+function updateTicketPreview() {
+  const wrap = document.getElementById('tkImagePreviewWrap');
+  const img = document.getElementById('tkImagePreview');
+  if (pendingTicketImage) {
+    img.src = pendingTicketImage;
+    wrap.classList.remove('hidden');
+  } else {
+    img.src = '';
+    wrap.classList.add('hidden');
+  }
+}
+
+function closeTicketModal() {
+  const m = document.getElementById('ticketModal');
+  m.classList.add('hidden');
+  m.classList.remove('flex');
+}
+
+// Header Collapse Button (100% immune to Lucide mutations)
+document.getElementById('btnToggleHeader').addEventListener('click', () => {
+  state.headerCollapsed = !state.headerCollapsed;
+  saveState();
+  applyHeaderCollapseUI();
+});
+
+// Profile Switchers
+document.getElementById('profileA').addEventListener('change', e => {
+  state.profileA = e.target.value;
+  saveState(); renderAll();
+  showToast('已更新旅伴 A 身分並重算 ISIC 預算');
+});
+document.getElementById('profileB').addEventListener('change', e => {
+  state.profileB = e.target.value;
+  saveState(); renderAll();
+  showToast('已更新旅伴 B 身分並重算 ISIC 預算');
+});
+
+// Tabs
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentTab = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      const active = b.dataset.tab === currentTab;
+      b.classList.toggle('border-sky-700', active);
+      b.classList.toggle('text-sky-800', active);
+      b.classList.toggle('bg-sky-50/70', active);
+      b.classList.toggle('border-transparent', !active);
+      b.classList.toggle('text-slate-600', !active);
+    });
+    ['itinerary', 'transit', 'bonus', 'vault', 'memories'].forEach(t => {
+      document.getElementById('tab-' + t).classList.toggle('hidden', t !== currentTab);
+    });
+  });
+});
+
+// Expand / Collapse All Days
+document.getElementById('btnExpandAllDays').addEventListener('click', () => {
+  state.collapsedDays = {};
+  saveState(); renderDays();
+});
+document.getElementById('btnCollapseAllDays').addEventListener('click', () => {
+  state.collapsedDays = {};
+  state.days.forEach(d => { state.collapsedDays[d.id] = true; });
+  saveState(); renderDays();
+});
+
+// Days Container Delegation
+document.getElementById('daysContainer').addEventListener('click', e => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const act = btn.dataset.action;
+  const dayId = btn.dataset.day;
+  const day = state.days.find(d => d.id === dayId);
+
+  if (act === 'open-day-detail') {
+    activeDayId = dayId;
+    renderDays();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  } else if (act === 'toggle-day') {
+    if (!state.collapsedDays) state.collapsedDays = {};
+    state.collapsedDays[dayId] = !state.collapsedDays[dayId];
+    saveState(); renderDays();
+  } else if (act === 'edit-day') {
+    openDayModal(dayId);
+  } else if (act === 'delete-day') {
+    if (state.days.length <= 1) { showToast('至少需保留一天行程'); return; }
+    state.days = state.days.filter(d => d.id !== dayId);
+    saveState(); renderAll();
+    showToast('已刪除該日行程');
+  } else if (act === 'toggle-item') {
+    const it = day.items.find(i => i.id === btn.dataset.id);
+    it.included = btn.checked;
+    saveState(); renderAll();
+  } else if (act === 'add-item') {
+    openModal('add-item', dayId, null);
+  } else if (act === 'edit-item') {
+    openModal('edit-item', dayId, btn.dataset.id);
+  } else if (act === 'delete-item') {
+    day.items = day.items.filter(i => i.id !== btn.dataset.id);
+    saveState(); renderAll();
+    showToast('已刪除行程項目');
+  } else if (act === 'move-up') {
+    const idx = Number(btn.dataset.idx);
+    if (idx > 0) {
+      [day.items[idx - 1], day.items[idx]] = [day.items[idx], day.items[idx - 1]];
+      saveState(); renderDays();
+    }
+  } else if (act === 'move-down') {
+    const idx = Number(btn.dataset.idx);
+    if (idx < day.items.length - 1) {
+      [day.items[idx + 1], day.items[idx]] = [day.items[idx], day.items[idx + 1]];
+      saveState(); renderDays();
+    }
+  }
+});
+
+// Transit Delegation
+document.getElementById('transitTableBody').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-action], input[data-action]');
+  if (!btn) return;
+  const act = btn.dataset.action;
+  if (act === 'toggle-transit') {
+    const t = state.transit.find(x => x.id === btn.dataset.id);
+    t.included = btn.checked;
+    saveState(); renderAll();
+  } else if (act === 'edit-transit') {
+    openModal('edit-transit', null, btn.dataset.id);
+  } else if (act === 'delete-transit') {
+    state.transit = state.transit.filter(x => x.id !== btn.dataset.id);
+    saveState(); renderAll();
+    showToast('已刪除交通項目');
+  }
+});
+document.getElementById('btnAddTransit').addEventListener('click', () => openModal('add-transit', null, null));
+
+// Bonus Attractions Delegation (Add / Edit / Delete / Push to Day)
+document.getElementById('btnAddBonus').addEventListener('click', () => openModal('add-bonus', null, null));
+document.getElementById('bonusCityFilter').addEventListener('change', renderBonus);
+document.getElementById('bonusIsicFilter').addEventListener('change', renderBonus);
+document.getElementById('bonusGrid').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-action]');
+  if (!btn) return;
+  const act = btn.dataset.action;
+  const bid = btn.dataset.bonus;
+
+  if (act === 'add-bonus-to-day') {
+    const b = state.bonus.find(x => x.id === bid);
+    const targetDayId = document.getElementById('sel_' + bid).value;
+    const day = state.days.find(d => d.id === targetDayId);
+    day.items.push({
+      id: 'it_' + Date.now(),
+      time: '彈性',
+      name: b.name,
+      currency: b.currency,
+      adult: b.adult,
+      isic: b.isic,
+      isicRule: b.isicRule,
+      isicNote: b.isicNote,
+      notes: b.notes,
+      included: true
+    });
+    saveState(); renderAll();
+    showToast(`已將「${b.name}」加入 ${day.date}`);
+  } else if (act === 'edit-bonus') {
+    openModal('edit-bonus', null, bid);
+  } else if (act === 'delete-bonus') {
+    state.bonus = state.bonus.filter(x => x.id !== bid);
+    saveState(); renderBonus();
+    showToast('已移除備選景點');
+  }
+});
+
+// Generic Modal Form Submit
+document.getElementById('btnCloseModal').addEventListener('click', closeModal);
+document.getElementById('btnCancelModal').addEventListener('click', closeModal);
+document.getElementById('modalForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const mode = document.getElementById('mMode').value;
+  const dayId = document.getElementById('mDayId').value;
+  const itemId = document.getElementById('mItemId').value;
+  const payload = {
+    time: document.getElementById('mTime').value.trim() || '彈性',
+    city: document.getElementById('mCitySelect').value,
+    name: document.getElementById('mName').value.trim(),
+    currency: document.getElementById('mCurrency').value,
+    adult: Number(document.getElementById('mAdult').value) || 0,
+    isic: Number(document.getElementById('mIsic').value) || 0,
+    isicRule: document.getElementById('mIsicRule').value,
+    isicNote: document.getElementById('mIsicNote').value.trim(),
+    notes: document.getElementById('mNotes').value.trim()
+  };
+
+  if (mode === 'add-item') {
+    state.days.find(d => d.id === dayId).items.push({ id: 'it_' + Date.now(), ...payload, included: true });
+  } else if (mode === 'edit-item') {
+    Object.assign(state.days.find(d => d.id === dayId).items.find(i => i.id === itemId), payload);
+  } else if (mode === 'add-transit') {
+    state.transit.push({ id: 't_' + Date.now(), cat: payload.time === 'local' ? 'local' : 'intercity', label: payload.name, method: payload.notes, currency: payload.currency, adult: payload.adult, isic: payload.isic, isicRule: payload.isicRule, isicNote: payload.isicNote, included: true });
+  } else if (mode === 'edit-transit') {
+    const t = state.transit.find(x => x.id === itemId);
+    Object.assign(t, { cat: payload.time === 'local' ? 'local' : 'intercity', label: payload.name, method: payload.notes, currency: payload.currency, adult: payload.adult, isic: payload.isic, isicRule: payload.isicRule, isicNote: payload.isicNote });
+  } else if (mode === 'add-bonus') {
+    state.bonus.unshift({ id: 'b_' + Date.now(), city: payload.city, name: payload.name, currency: payload.currency, adult: payload.adult, isic: payload.isic, isicRule: payload.isicRule, isicNote: payload.isicNote, notes: payload.notes });
+  } else if (mode === 'edit-bonus') {
+    const b = state.bonus.find(x => x.id === itemId);
+    Object.assign(b, { city: payload.city, name: payload.name, currency: payload.currency, adult: payload.adult, isic: payload.isic, isicRule: payload.isicRule, isicNote: payload.isicNote, notes: payload.notes });
+  }
+
+  saveState(); closeModal(); renderAll();
+  showToast('已儲存變更');
+});
+
+// Ticket Vault Events
+document.getElementById('btnAddTicket').addEventListener('click', () => openTicketModal(null));
+document.getElementById('btnCloseTicketModal').addEventListener('click', closeTicketModal);
+document.getElementById('btnCancelTicketModal').addEventListener('click', closeTicketModal);
+document.getElementById('btnClearTkImage').addEventListener('click', () => {
+  pendingTicketImage = '';
+  document.getElementById('tkFile').value = '';
+  updateTicketPreview();
+});
+
+document.getElementById('tkFile').addEventListener('change', e => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const maxW = 900;
+      const scale = Math.min(1, maxW / img.width);
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      pendingTicketImage = canvas.toDataURL('image/jpeg', 0.78);
+      updateTicketPreview();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('ticketForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const id = document.getElementById('tkId').value;
+  const payload = {
+    category: document.getElementById('tkCategory').value,
+    title: document.getElementById('tkTitle').value.trim(),
+    code: document.getElementById('tkCode').value.trim(),
+    date: document.getElementById('tkDate').value.trim(),
+    url: document.getElementById('tkUrl').value.trim(),
+    note: document.getElementById('tkNote').value.trim(),
+    image: pendingTicketImage
+  };
+  if (id) {
+    Object.assign(state.tickets.find(x => x.id === id), payload);
+  } else {
+    state.tickets.unshift({ id: 'tk_' + Date.now(), ...payload });
+  }
+  saveState(); closeTicketModal(); renderVault();
+  showToast('已儲存票券憑證');
+});
+
+document.getElementById('ticketsGrid').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-action]');
+  if (!btn) return;
+  const act = btn.dataset.action;
+  if (act === 'copy-code') {
+    const code = btn.dataset.code;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(code).then(() => showToast('已複製代號：' + code)).catch(() => fallbackCopy(code));
+    } else fallbackCopy(code);
+  } else if (act === 'edit-ticket') {
+    openTicketModal(btn.dataset.id);
+  } else if (act === 'delete-ticket') {
+    state.tickets = state.tickets.filter(x => x.id !== btn.dataset.id);
+    saveState(); renderVault();
+    showToast('已刪除憑證');
+  } else if (act === 'view-ticket-img') {
+    const tk = state.tickets.find(x => x.id === btn.dataset.id);
+    if (tk && tk.image) {
+      document.getElementById('lightboxTitle').textContent = tk.title;
+      document.getElementById('lightboxImg').src = tk.image;
+      const lb = document.getElementById('lightboxModal');
+      lb.classList.remove('hidden');
+      lb.classList.add('flex');
+    }
+  }
+});
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); showToast('已複製代號：' + text); } catch (e) {}
+  document.body.removeChild(ta);
+}
+
+document.getElementById('btnCloseLightbox').addEventListener('click', () => {
+  const lb = document.getElementById('lightboxModal');
+  lb.classList.add('hidden');
+  lb.classList.remove('flex');
+});
+
+// Memos Events
+document.getElementById('btnAddMemo').addEventListener('click', () => {
+  state.memos.unshift({ id: 'm_' + Date.now(), title: '新備忘錄', body: '' });
+  saveState(); renderVault();
+  showToast('已新增筆記');
+});
+document.getElementById('memosContainer').addEventListener('input', e => {
+  const el = e.target;
+  const m = state.memos.find(x => x.id === el.dataset.id);
+  if (!m) return;
+  if (el.dataset.action === 'memo-title') m.title = el.value;
+  if (el.dataset.action === 'memo-body') m.body = el.value;
+  saveState();
+});
+document.getElementById('memosContainer').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-action="delete-memo"]');
+  if (!btn) return;
+  state.memos = state.memos.filter(x => x.id !== btn.dataset.id);
+  saveState(); renderVault();
+  showToast('已刪除筆記');
+});
+
+// Checklist Events
+document.getElementById('checklistAddForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const input = document.getElementById('checklistInput');
+  const text = input.value.trim();
+  if (!text) return;
+  state.checklist.unshift({ id: 'c_' + Date.now(), text, done: false });
+  input.value = '';
+  saveState(); renderVault();
+});
+document.getElementById('checklistContainer').addEventListener('click', e => {
+  const el = e.target.closest('[data-action]');
+  if (!el) return;
+  if (el.dataset.action === 'toggle-check') {
+    const c = state.checklist.find(x => x.id === el.dataset.id);
+    c.done = el.checked;
+    saveState(); renderVault();
+  } else if (el.dataset.action === 'delete-check') {
+    state.checklist = state.checklist.filter(x => x.id !== el.dataset.id);
+    saveState(); renderVault();
+  }
+});
+
+// Currency Converter & Food Slider
+function syncCurrency(source) {
+  const elEUR = document.getElementById('convEUR');
+  const elCZK = document.getElementById('convCZK');
+  const elHUF = document.getElementById('convHUF');
+  const elTWD = document.getElementById('convTWD');
+  let eur = 0;
+  if (source === 'EUR') eur = Number(elEUR.value) || 0;
+  else if (source === 'CZK') eur = (Number(elCZK.value) || 0) * RATES.CZK;
+  else if (source === 'HUF') eur = (Number(elHUF.value) || 0) * RATES.HUF;
+  else if (source === 'TWD') eur = (Number(elTWD.value) || 0) / RATES.TWD;
+
+  if (source !== 'EUR') elEUR.value = eur.toFixed(2);
+  if (source !== 'CZK') elCZK.value = Math.round(eur / RATES.CZK);
+  if (source !== 'HUF') elHUF.value = Math.round(eur / RATES.HUF);
+  if (source !== 'TWD') elTWD.value = Math.round(eur * RATES.TWD);
+}
+['EUR', 'CZK', 'HUF', 'TWD'].forEach(c => {
+  document.getElementById('conv' + c).addEventListener('input', () => syncCurrency(c));
+});
+document.getElementById('foodPerDaySlider').addEventListener('input', e => {
+  state.foodPerDay = Number(e.target.value);
+  saveState(); renderSummary();
+});
+
+// Import / Export / Print / Reset
+document.getElementById('btnPrint').addEventListener('click', () => window.print());
+document.getElementById('btnSaveHtml').addEventListener('click', () => {
+  try {
+    const docClone = document.documentElement.cloneNode(true);
+    // Clean transient UI states in clone if needed, and bake current state into a hydration script
+    const serialized = JSON.stringify(state).replace(/<\/script/gi, '<\\/script');
+    let html = '<!DOCTYPE html>\n' + docClone.outerHTML;
+    // Replace DEFAULT_DATA initialization by injecting a preloaded override right before loadState()
+    const marker = 'let state = loadState();';
+    if (html.includes(marker)) {
+      html = html.replace(marker, 'const BAKED_STATE = ' + serialized + ';\nlet state = BAKED_STATE;', 1);
+    }
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '2027-prague-budapest-updated.html';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('已下載包含您最新修改的獨立網頁檔！');
+  } catch (err) {
+    showToast('下載失敗，請改用「匯出JSON」備份');
+  }
+});
+
+document.getElementById('btnExport').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '2027-prague-budapest-planner.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('已匯出完整行程與備忘錄 JSON 檔');
+});
+document.getElementById('btnImport').addEventListener('click', () => document.getElementById('importFileInput').click());
+document.getElementById('importFileInput').addEventListener('change', e => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const imported = JSON.parse(ev.target.result);
+      if (!imported.days || !imported.transit) throw new Error('invalid');
+      state = Object.assign(JSON.parse(JSON.stringify(DEFAULT_DATA)), imported);
+      saveState(); renderAll();
+      showToast('已成功匯入行程備份');
+    } catch (err) {
+      showToast('匯入失敗：檔案格式不正確');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+document.getElementById('btnReset').addEventListener('click', () => {
+  state = JSON.parse(JSON.stringify(DEFAULT_DATA));
+  saveState(); renderAll();
+  showToast('已恢復為預設行程與資料');
+});
+
+// Accommodations Events
+document.getElementById('btnAddAcc').addEventListener('click', () => openAccModal(null));
+document.getElementById('btnCloseAccModal').addEventListener('click', closeAccModal);
+document.getElementById('btnCancelAccModal').addEventListener('click', closeAccModal);
+document.getElementById('accGrid').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-action]');
+  if (!btn) return;
+  if (btn.dataset.action === 'edit-acc') openAccModal(btn.dataset.id);
+  else if (btn.dataset.action === 'delete-acc') {
+    state.accommodations = state.accommodations.filter(x => x.id !== btn.dataset.id);
+    saveState(); renderAll();
+    showToast('已刪除住宿項目');
+  }
+});
+document.getElementById('accForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const id = document.getElementById('accId').value;
+  const payload = {
+    name: document.getElementById('accName').value.trim(),
+    dates: document.getElementById('accDates').value.trim(),
+    address: document.getElementById('accAddress').value.trim(),
+    eur: Number(document.getElementById('accEur').value) || 0,
+    times: document.getElementById('accTimes').value.trim(),
+    code: document.getElementById('accCode').value.trim(),
+    pin: document.getElementById('accPin').value.trim()
+  };
+  if (id) {
+    Object.assign(state.accommodations.find(x => x.id === id), payload);
+  } else {
+    state.accommodations.push({ id: 'a_' + Date.now(), ...payload });
+  }
+  saveState(); closeAccModal(); renderAll();
+  showToast('已儲存住宿明細');
+});
+
+function openDayModal(dayId) {
+  if (dayId) {
+    const d = state.days.find(x => x.id === dayId);
+    document.getElementById('dayModalTitle').textContent = '編輯行程日期';
+    document.getElementById('dyId').value = d.id;
+    document.getElementById('dyDate').value = d.date || '';
+    document.getElementById('dyCity').value = d.city || '';
+    document.getElementById('dyTitle').value = d.title || '';
+    document.getElementById('dyHotel').value = d.hotel || '';
+    document.getElementById('dyInsertPosWrap').classList.add('hidden');
+  } else {
+    document.getElementById('dayModalTitle').textContent = '新增行程日期';
+    document.getElementById('dyId').value = '';
+    document.getElementById('dyDate').value = '';
+    document.getElementById('dyCity').value = '巴黎';
+    document.getElementById('dyTitle').value = '';
+    document.getElementById('dyHotel').value = '';
+    document.getElementById('dyInsertPos').value = 'end';
+    document.getElementById('dyInsertPosWrap').classList.remove('hidden');
+  }
+  const m = document.getElementById('dayModal');
+  m.classList.remove('hidden');
+  m.classList.add('flex');
+}
+
+function closeDayModal() {
+  const m = document.getElementById('dayModal');
+  m.classList.add('hidden');
+  m.classList.remove('flex');
+}
+
+document.getElementById('btnAddDay').addEventListener('click', () => openDayModal(null));
+document.getElementById('btnCloseDayModal').addEventListener('click', closeDayModal);
+document.getElementById('btnCancelDayModal').addEventListener('click', closeDayModal);
+document.getElementById('dayForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const id = document.getElementById('dyId').value;
+  const payload = {
+    date: document.getElementById('dyDate').value.trim(),
+    city: document.getElementById('dyCity').value.trim(),
+    title: document.getElementById('dyTitle').value.trim(),
+    hotel: document.getElementById('dyHotel').value.trim()
+  };
+  if (id) {
+    Object.assign(state.days.find(x => x.id === id), payload);
+    showToast('已更新日期資訊');
+  } else {
+    const newDay = { id: 'd_' + Date.now(), ...payload, items: [] };
+    if (document.getElementById('dyInsertPos').value === 'start') state.days.unshift(newDay);
+    else state.days.push(newDay);
+    showToast(`已新增「${payload.date}」至每日行程`);
+  }
+  saveState(); closeDayModal(); renderAll();
+});
+
+// Day Detail View Events
+document.getElementById('dayDetailView').addEventListener('click', e => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const act = btn.dataset.action;
+  const day = state.days.find(d => d.id === activeDayId);
+  if (act === 'back-to-list') {
+    activeDayId = null;
+    renderDays();
+  } else if (act === 'switch-day') {
+    activeDayId = btn.dataset.day;
+    renderDays();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else if (act === 'detail-edit-day') {
+    openDayModal(activeDayId);
+  } else if (act === 'detail-add-item') {
+    openModal('add-item', activeDayId, null);
+  } else if (act === 'detail-edit-item') {
+    openModal('edit-item', activeDayId, btn.dataset.id);
+  } else if (act === 'detail-delete-item') {
+    day.items = day.items.filter(i => i.id !== btn.dataset.id);
+    saveState(); renderAll();
+    showToast('已刪除行程項目');
+  } else if (act === 'detail-toggle-item') {
+    const it = day.items.find(i => i.id === btn.dataset.id);
+    it.included = btn.checked;
+    saveState(); renderAll();
+  } else if (act === 'detail-move-up') {
+    const idx = Number(btn.dataset.idx);
+    if (idx > 0) {
+      [day.items[idx - 1], day.items[idx]] = [day.items[idx], day.items[idx - 1]];
+      saveState(); renderDays();
+    }
+  } else if (act === 'detail-move-down') {
+    const idx = Number(btn.dataset.idx);
+    if (idx < day.items.length - 1) {
+      [day.items[idx + 1], day.items[idx]] = [day.items[idx], day.items[idx + 1]];
+      saveState(); renderDays();
+    }
+  }
+});
+
+document.getElementById('dayDetailView').addEventListener('input', e => {
+  const field = e.target.dataset && e.target.dataset.guideField;
+  if (!field) return;
+  const day = state.days.find(d => d.id === activeDayId);
+  if (!day) return;
+  if (!day.guide) day.guide = getDayGuide(day);
+  day.guide[field] = e.target.value;
+  saveState();
+});
+
+
+function renderMemories() {
+  const tagF = document.getElementById('memoryTagFilter').value;
+  const list = (state.memories || []).filter(m => tagF === 'all' || m.tag === tagF);
+  const tagColors = {
+    '絕美風景': 'bg-sky-50 text-sky-700 border-sky-200',
+    '美食紀錄': 'bg-amber-50 text-amber-700 border-amber-200',
+    '旅伴日常': 'bg-rose-50 text-rose-700 border-rose-200',
+    '超推薦': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    '踩雷提醒': 'bg-slate-100 text-slate-700 border-slate-300'
+  };
+
+  document.getElementById('memoriesGrid').innerHTML = list.map(m => {
+    const photos = m.photos || [];
+    const photosHtml = photos.length ? `
+      <div class="grid ${photos.length === 1 ? 'grid-cols-1' : (photos.length === 2 ? 'grid-cols-2' : 'grid-cols-3')} gap-1.5 mt-2.5">
+        ${photos.map((p, idx) => `
+          <button type="button" data-action="view-mem-photo" data-id="${m.id}" data-idx="${idx}" class="block overflow-hidden rounded-lg border border-slate-200 group">
+            <img src="${p}" alt="回憶照片" class="${photos.length === 1 ? 'h-44' : 'h-24'} w-full object-cover group-hover:opacity-90">
+          </button>
+        `).join('')}
+      </div>` : '';
+
+    return `
+      <article class="rounded-xl border border-slate-200 bg-slate-50/50 p-4 flex flex-col justify-between gap-2.5 print-break-avoid">
+        <div>
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-800 text-white">${escapeHtml(m.date)}</span>
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full border ${tagColors[m.tag] || 'bg-slate-100 text-slate-700'}">${escapeHtml(m.tag)}</span>
+            </div>
+            <div class="flex items-center gap-0.5 shrink-0 no-print">
+              <button type="button" data-action="edit-mem" data-id="${m.id}" class="p-1 rounded hover:bg-sky-100 text-sky-700" title="編輯回憶"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+              <button type="button" data-action="delete-mem" data-id="${m.id}" class="p-1 rounded hover:bg-rose-100 text-rose-600" title="刪除回憶"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+            </div>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900 mt-2.5">${escapeHtml(m.title)}</h3>
+          ${photosHtml}
+          <p class="text-xs text-slate-600 mt-2.5 whitespace-pre-line leading-relaxed">${escapeHtml(m.body)}</p>
+        </div>
+      </article>
+    `;
+  }).join('') || '<div class="col-span-full text-center py-10 text-xs text-slate-400">還沒有符合的旅遊回憶，點擊右上角「新增回憶」開始記錄這趟旅程吧！</div>';
+  lucide.createIcons();
+}
+
+function openMemoryModal(id) {
+  document.getElementById('memFiles').value = '';
+  if (id) {
+    const m = (state.memories || []).find(x => x.id === id);
+    document.getElementById('memoryModalTitle').textContent = '編輯旅遊回憶';
+    document.getElementById('memId').value = m.id;
+    document.getElementById('memDate').value = m.date || '';
+    document.getElementById('memTag').value = m.tag || '絕美風景';
+    document.getElementById('memTitle').value = m.title || '';
+    document.getElementById('memBody').value = m.body || '';
+    pendingMemoryPhotos = [...(m.photos || [])];
+  } else {
+    document.getElementById('memoryModalTitle').textContent = '新增旅遊回憶';
+    document.getElementById('memId').value = '';
+    document.getElementById('memDate').value = '';
+    document.getElementById('memTag').value = '絕美風景';
+    document.getElementById('memTitle').value = '';
+    document.getElementById('memBody').value = '';
+    pendingMemoryPhotos = [];
+  }
+  renderMemPhotosPreview();
+  const modal = document.getElementById('memoryModal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function closeMemoryModal() {
+  const modal = document.getElementById('memoryModal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
+function renderMemPhotosPreview() {
+  document.getElementById('memPhotosPreview').innerHTML = pendingMemoryPhotos.map((p, idx) => `
+    <div class="relative rounded-lg overflow-hidden border border-slate-200">
+      <img src="${p}" alt="預覽" class="h-20 w-full object-cover">
+      <button type="button" data-action="remove-mem-photo" data-idx="${idx}" class="absolute top-1 right-1 bg-slate-900/75 text-white rounded-full p-0.5 hover:bg-rose-600" title="移除這張照片">
+        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+  `).join('');
+}
+
+document.getElementById('btnAddMemory').addEventListener('click', () => openMemoryModal(null));
+document.getElementById('btnCloseMemoryModal').addEventListener('click', closeMemoryModal);
+document.getElementById('btnCancelMemoryModal').addEventListener('click', closeMemoryModal);
+document.getElementById('memoryTagFilter').addEventListener('change', renderMemories);
+
+document.getElementById('memPhotosPreview').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-action="remove-mem-photo"]');
+  if (!btn) return;
+  pendingMemoryPhotos.splice(Number(btn.dataset.idx), 1);
+  renderMemPhotosPreview();
+});
+
+document.getElementById('memFiles').addEventListener('change', e => {
+  const limit = 12;
+  const files = Array.from(e.target.files || []).slice(0, limit - pendingMemoryPhotos.length);
+  if (!files.length) return;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        const maxW = 1000;
+        const scale = Math.min(1, maxW / img.width);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        if (pendingMemoryPhotos.length < limit) {
+          pendingMemoryPhotos.push(canvas.toDataURL('image/jpeg', 0.78));
+          renderMemPhotosPreview();
+        }
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+});
+
+document.getElementById('memoryForm').addEventListener('submit', e => {
+  e.preventDefault();
+  if (!state.memories) state.memories = [];
+  const id = document.getElementById('memId').value;
+  const payload = {
+    date: document.getElementById('memDate').value.trim(),
+    tag: document.getElementById('memTag').value,
+    title: document.getElementById('memTitle').value.trim(),
+    body: document.getElementById('memBody').value.trim(),
+    photos: [...pendingMemoryPhotos]
+  };
+  if (id) {
+    Object.assign(state.memories.find(x => x.id === id), payload);
+  } else {
+    state.memories.unshift({ id: 'mem_' + Date.now(), ...payload });
+  }
+  saveState(); closeMemoryModal(); renderMemories();
+  showToast('已儲存旅遊回憶');
+});
+
+document.getElementById('memoriesGrid').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-action]');
+  if (!btn) return;
+  const act = btn.dataset.action;
+  const id = btn.dataset.id;
+  if (act === 'edit-mem') {
+    openMemoryModal(id);
+  } else if (act === 'delete-mem') {
+    state.memories = state.memories.filter(x => x.id !== id);
+    saveState(); renderMemories();
+    showToast('已刪除回憶');
+  } else if (act === 'view-mem-photo') {
+    const m = (state.memories || []).find(x => x.id === id);
+    const photo = m && m.photos && m.photos[Number(btn.dataset.idx)];
+    if (photo) {
+      document.getElementById('lightboxTitle').textContent = `${m.date} · ${m.title}`;
+      document.getElementById('lightboxImg').src = photo;
+      const lb = document.getElementById('lightboxModal');
+      lb.classList.remove('hidden');
+      lb.classList.add('flex');
+    }
+  }
+});
+
+renderAll();
+openIDB().then(async db => {
+  if (!db) return;
+  const saved = await idbGet(STORAGE_KEY);
+  if (saved) {
+    state = Object.assign(JSON.parse(JSON.stringify(DEFAULT_DATA)), saved);
+  } else if (canUseStorage && localStorage.getItem(STORAGE_KEY)) {
+    await idbSet(STORAGE_KEY, state);
+  }
+  renderAll();
+});
+</script>
+</body>
+</html>
